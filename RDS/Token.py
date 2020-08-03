@@ -147,7 +147,7 @@ class OAuth2Token(Token):
         refresh_token: str = "",
         expiration_date: datetime.datetime = None,
     ):
-        super(OAuth2Token, self).__init__(user, service, access_token)
+        super().__init__(user, service, access_token)
 
         from RDS import OAuth2Service
 
@@ -180,14 +180,14 @@ class OAuth2Token(Token):
         Check, if tokens are equal. You must not check if the refresh or access_tokens are equal,
         because they could be changed already. Only servicename is relevant.
         """
-        return super(OAuth2Token, self).__eq__(obj)
+        return super().__eq__(obj)
 
     def to_json(self):
         """
         Returns this object as a json string.
         """
 
-        data = super(OAuth2Token, self).to_json()
+        data = super().to_json()
 
         data["type"] = self.__class__.__name__
         data["data"].update(self.to_dict())
@@ -198,7 +198,7 @@ class OAuth2Token(Token):
         """
         Returns this object as a dict.
         """
-        data = super(OAuth2Token, self).to_dict()
+        data = super().to_dict()
         data["refresh_token"] = self._refresh_token
         data["expiration_date"] = str(self._expiration_date)
 

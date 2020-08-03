@@ -140,7 +140,7 @@ class OAuth2Service(Service):
         client_secret: str,
         implements: list = None,
     ):
-        super(OAuth2Service, self).__init__(servicename, implements)
+        super().__init__(servicename, implements)
 
         self.check_string(authorize_url, "authorize_url")
         self.check_string(refresh_url, "refresh_url")
@@ -283,7 +283,7 @@ class OAuth2Service(Service):
         )
 
     def __eq__(self, obj):
-        return super(OAuth2Service, self).__eq__(obj) or (
+        return super().__eq__(obj) or (
             isinstance(obj, (OAuth2Service))
             and self.refresh_url == obj.refresh_url
             and self.authorize_url == obj.authorize_url
@@ -296,7 +296,7 @@ class OAuth2Service(Service):
         Returns this object as a json string.
         """
 
-        data = super(OAuth2Service, self).to_json()
+        data = super().to_json()
 
         data["type"] = self.__class__.__name__
         data["data"].update(self.to_dict())
@@ -307,7 +307,7 @@ class OAuth2Service(Service):
         """
         Returns this object as a dict.
         """
-        data = super(OAuth2Service, self).to_dict()
+        data = super().to_dict()
         data["authorize_url"] = self.authorize_url
         data["refresh_url"] = self.refresh_url
         data["client_id"] = self._client_id
