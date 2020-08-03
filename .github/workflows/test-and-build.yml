@@ -2,7 +2,7 @@ name: Testing environment
 on: push
 
 jobs:
-  coverage:
+  test:
     name: coverage
     runs-on: ubuntu-latest
     steps:
