@@ -118,7 +118,7 @@ class Token:
         if not isinstance(obj, (str, dict)):
             raise ValueError("Given object not from type str or dict.")
 
-        from Util import try_function_on_dict
+        from RDS.Util import try_function_on_dict
 
         load = try_function_on_dict(
             [
