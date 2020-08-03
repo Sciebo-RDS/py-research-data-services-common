@@ -1,6 +1,6 @@
 from .User import *
 from .Service import *
-from .Exceptions import ServiceException
+from . import ServiceException
 from .Token import *
 import RDS.Util as Util
 

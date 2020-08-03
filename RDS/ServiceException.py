@@ -1,6 +1,6 @@
-from ..Service import Service
-from ..Token import Token, OAuth2Token
-from ..User import User
+from .Service import Service
+from .Token import Token, OAuth2Token
+from .User import User
 
 
 class TokenNotValidError(Exception):
