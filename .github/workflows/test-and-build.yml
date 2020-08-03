@@ -13,13 +13,11 @@ jobs:
       # Downloads a copy of the code in your repository before running CI tests
       - name: Check out repository code
         uses: actions/checkout@v2
-
-      - name: Run tests
         # Runs a script that creates a Redis client, populates
         # the client with data, and retrieves data
+      - name: Run tests
         run: make test
-        # Environment variable used by the library to create a new Redis client.
-        
+
   build-n-publish:
     needs: test
     name: Build and publish Python distributions to PyPI
@@ -41,16 +39,16 @@ jobs:
           password: ${{ secrets.pypi_password }}
 
   coverage:
-    needs: [ test ]
+    needs: [test]
     name: coverage
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-python@master
-      with:
-        python-version: '3.6'
-    - uses: paambaati/codeclimate-action@v2.5.3
-      env:
-        CC_TEST_REPORTER_ID: ${{ secrets.CodeClimate }}
-      with:
-        coverageCommand: coverage xml
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@master
+        with:
+          python-version: "3.6"
+      - uses: paambaati/codeclimate-action@v2.5.3
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CodeClimate }}
+        with:
+          coverageCommand: coverage xml
