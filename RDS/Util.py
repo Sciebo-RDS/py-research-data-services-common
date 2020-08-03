@@ -145,7 +145,7 @@ def monkeypatch(func_name: str = "to_json"):
     JSONEncoder.default = to_default  # Replace it.
 
 
-# this part can only be used, if flask is installed. Use 
+# this part can only be used, if flask is installed. See: https://github.com/Sciebo-RDS/py-research-data-services-common#optional-dependencies
 try:
     from flask.json import JSONEncoder
     def get_encoder(func_name: str = "to_json"):
