@@ -1,4 +1,4 @@
-[![Maintainability](https://api.codeclimate.com/v1/badges/002a567a70219a941a2f/maintainability)](https://codeclimate.com/github/Sciebo-RDS/py-research-data-services-common/maintainability)[![Test Coverage](https://api.codeclimate.com/v1/badges/002a567a70219a941a2f/test_coverage)](https://codeclimate.com/github/Sciebo-RDS/py-research-data-services-common/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/002a567a70219a941a2f/maintainability)](https://codeclimate.com/github/Sciebo-RDS/py-research-data-services-common/maintainability)[![Test Coverage](https://api.codeclimate.com/v1/badges/002a567a70219a941a2f/test_coverage)](https://codeclimate.com/github/Sciebo-RDS/py-research-data-services-common/test_coverage)[![PyPI version](https://badge.fury.io/py/research-data-services-common.svg)](https://badge.fury.io/py/research-data-services-common)
 
 # Research Data Services Common Package
 
