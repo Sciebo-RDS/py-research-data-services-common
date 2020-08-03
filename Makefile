@@ -15,4 +15,4 @@ sdist:
 	python setup.py sdist
 
 clean:
-	rm -r dist src/*.egg-info build .coverage coverage.xml .pytest_cache
+	rm -r dist *.egg-info build .coverage coverage.xml .pytest_cache RDS/__pycache__ tests/__pycache__
