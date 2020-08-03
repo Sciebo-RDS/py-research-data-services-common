@@ -112,14 +112,6 @@ class TestToken(unittest.TestCase):
         self.assertIsInstance(self.oauthtoken1, Token)
 
     def test_token_json(self):
-        expected = {
-            "type": "Token",
-            "data": {
-                "service": self.service1,
-                "access_token": self.token1._access_token,
-            },
-        }
-
         dump = json.dumps(self.token1)
         # self.assertEqual(dump, json.dumps(expected))
         self.assertEqual(Token.from_json(dump), self.token1)

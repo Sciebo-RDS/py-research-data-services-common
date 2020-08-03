@@ -233,8 +233,7 @@ class TestService(unittest.TestCase):
             "XYZ",
         )
 
-        from lib.User import User
-        from lib.Token import Token, OAuth2Token
+        from RDS import User, Token, OAuth2Token
 
         with self.assertRaises(ValueError):
             svc1.refresh(Token(User("Max Mustermann"), svc1, "ABC"))

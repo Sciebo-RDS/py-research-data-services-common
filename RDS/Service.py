@@ -1,5 +1,5 @@
-from lib.Token import Token, OAuth2Token
-from lib.User import User
+from .Token import Token, OAuth2Token
+from .User import User
 from urllib.parse import urlparse, urlunparse
 import requests
 import json
@@ -107,7 +107,7 @@ class Service:
         if not isinstance(obj, (str, dict)):
             raise ValueError("Given object not from type str or dict.")
 
-        from Util import try_function_on_dict
+        from RDS.Util import try_function_on_dict
 
         load = try_function_on_dict(
             [
@@ -203,27 +203,27 @@ class OAuth2Service(Service):
                 error_type = data["error"]
 
                 if error_type == "invalid_request":
-                    from .Exceptions.ServiceException import OAuth2InvalidRequestError
+                    from RDS.ServiceException import OAuth2InvalidRequestError
 
                     raise OAuth2InvalidRequestError()
                 elif error_type == "invalid_client":
-                    from .Exceptions.ServiceException import OAuth2InvalidClientError
+                    from RDS.ServiceException import OAuth2InvalidClientError
 
                     raise OAuth2InvalidClientError()
                 elif error_type == "invalid_grant":
-                    from .Exceptions.ServiceException import OAuth2InvalidGrantError
+                    from RDS.ServiceException import OAuth2InvalidGrantError
 
                     raise OAuth2InvalidGrantError()
                 elif error_type == "unauthorized_client":
-                    from .Exceptions.ServiceException import OAuth2UnauthorizedClient
+                    from RDS.ServiceException import OAuth2UnauthorizedClient
 
                     raise OAuth2UnauthorizedClient()
                 elif error_type == "unsupported_grant_type":
-                    from .Exceptions.ServiceException import OAuth2UnsupportedGrantType
+                    from RDS.ServiceException import OAuth2UnsupportedGrantType
 
                     raise OAuth2UnsupportedGrantType()
 
-            from .Exceptions.ServiceException import OAuth2UnsuccessfulResponseError
+            from RDS.ServiceException import OAuth2UnsuccessfulResponseError
 
             raise OAuth2UnsuccessfulResponseError()
 
@@ -233,7 +233,7 @@ class OAuth2Service(Service):
 
         """ obsolete
         if not data["user_id"] == self.client_id:
-            from .Exceptions.ServiceException import Token.TokenNotValidError
+            from RDS.ServiceException import Token.TokenNotValidError
             raise Token.TokenNotValidError(
                 self, token, "User-ID in refresh response not equal to authenticated user.")
         """

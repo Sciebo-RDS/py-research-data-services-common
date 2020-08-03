@@ -2,7 +2,7 @@ import json
 from typing import Union
 
 
-class User():
+class User:
     """
     Represents a user, which can access services via tokens.
     """
@@ -29,29 +29,21 @@ class User():
             except:
                 return False
 
-        return (
-            isinstance(obj, (User)) and
-            self.username == obj.username
-        )
+        return isinstance(obj, (User)) and self.username == obj.username
 
     def to_json(self):
         """
         Returns this object as a json string.
         """
 
-        data = {
-            "type": self.__class__.__name__,
-            "data": self.to_dict()
-        }
+        data = {"type": self.__class__.__name__, "data": self.to_dict()}
         return data
 
     def to_dict(self):
         """
         Returns this object as a dict.
         """
-        data = {
-            "username": self._username
-        }
+        data = {"username": self._username}
 
         return data
 
@@ -90,7 +82,7 @@ class User():
         if not isinstance(obj, (str, dict)):
             raise ValueError("Given object not from type str or dict.")
 
-        from Util import try_function_on_dict
-        
+        from RDS.Util import try_function_on_dict
+
         load = try_function_on_dict([User.from_json, User.from_dict])
         return load(obj)

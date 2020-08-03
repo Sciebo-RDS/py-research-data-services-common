@@ -1,10 +1,10 @@
 import datetime
 import json
 from typing import Union
-from lib.User import User
+from RDS import User
 
 
-class Token():
+class Token:
     """
     This token represents a simple password.
     """
@@ -16,7 +16,8 @@ class Token():
     def __init__(self, user: User, service, access_token: str):
         self.check_string(access_token, "access_token")
 
-        from lib.Service import Service
+        from RDS import Service
+
         if not isinstance(service, Service):
             raise ValueError(f"service parameter needs to be of type Service.")
 
@@ -53,9 +54,9 @@ class Token():
         Returns True, if this object and other object have the same servicename and user. Otherwise false.
         """
         return (
-            isinstance(other, (Token)) and
-            self.service == other.service and
-            self.user == other.user
+            isinstance(other, (Token))
+            and self.service == other.service
+            and self.user == other.user
         )
 
     def to_json(self):
@@ -63,10 +64,7 @@ class Token():
         Returns this object as a json string.
         """
 
-        data = {
-            "type": self.__class__.__name__,
-            "data": self.to_dict()
-        }
+        data = {"type": self.__class__.__name__, "data": self.to_dict()}
         return data
 
     def to_dict(self):
@@ -76,7 +74,7 @@ class Token():
         data = {
             "service": self._service,
             "access_token": self._access_token,
-            "user": self._user
+            "user": self._user,
         }
 
         return data
@@ -88,7 +86,9 @@ class Token():
         """
 
         data = tokenStr
-        while type(data) is not dict:  # FIX for bug: JSON.loads sometimes returns a string
+        while (
+            type(data) is not dict
+        ):  # FIX for bug: JSON.loads sometimes returns a string
             data = json.loads(data)
 
         if "type" in data and str(data["type"]).endswith("Token") and "data" in data:
@@ -102,8 +102,13 @@ class Token():
         """
         Returns a token object from a dict.
         """
-        from lib.Service import Service
-        return Token(User.init(tokenDict["user"]), Service.init(tokenDict["service"]), tokenDict["access_token"])
+        from RDS import Service
+
+        return Token(
+            User.init(tokenDict["user"]),
+            Service.init(tokenDict["service"]),
+            tokenDict["access_token"],
+        )
 
     @staticmethod
     def init(obj: Union[str, dict]):
@@ -115,7 +120,14 @@ class Token():
 
         from Util import try_function_on_dict
 
-        load = try_function_on_dict([OAuth2Token.from_json, Token.from_json, OAuth2Token.from_dict, Token.from_dict])
+        load = try_function_on_dict(
+            [
+                OAuth2Token.from_json,
+                Token.from_json,
+                OAuth2Token.from_dict,
+                Token.from_dict,
+            ]
+        )
         return load(obj)
 
 
@@ -127,11 +139,18 @@ class OAuth2Token(Token):
     _refresh_token = None
     _expiration_date = None
 
-    def __init__(self, user: User, service, access_token: str, refresh_token: str = "",
-                 expiration_date: datetime.datetime = None):
+    def __init__(
+        self,
+        user: User,
+        service,
+        access_token: str,
+        refresh_token: str = "",
+        expiration_date: datetime.datetime = None,
+    ):
         super(OAuth2Token, self).__init__(user, service, access_token)
 
-        from lib.Service import OAuth2Service
+        from RDS import OAuth2Service
+
         if not isinstance(service, OAuth2Service):
             raise ValueError("parameter service is not an oauth2service")
 
@@ -161,9 +180,7 @@ class OAuth2Token(Token):
         Check, if tokens are equal. You must not check if the refresh or access_tokens are equal,
         because they could be changed already. Only servicename is relevant.
         """
-        return (
-            super(OAuth2Token, self).__eq__(obj)
-        )
+        return super(OAuth2Token, self).__eq__(obj)
 
     def to_json(self):
         """
@@ -194,7 +211,9 @@ class OAuth2Token(Token):
         """
 
         data = tokenStr
-        while type(data) is not dict:  # FIX for bug: JSON.loads sometimes returns a string
+        while (
+            type(data) is not dict
+        ):  # FIX for bug: JSON.loads sometimes returns a string
             data = json.loads(data)
 
         if "type" in data and str(data["type"]).endswith("OAuth2Token"):
@@ -209,5 +228,12 @@ class OAuth2Token(Token):
         Returns an oauthtoken object from dict.
         """
         token = super(OAuth2Token, cls).from_dict(tokenDict)
-        
-        return OAuth2Token(token.user, token.service, token.access_token, tokenDict["refresh_token"], tokenDict["expiration_date"])
+
+        return OAuth2Token(
+            token.user,
+            token.service,
+            token.access_token,
+            tokenDict["refresh_token"],
+            tokenDict["expiration_date"],
+        )
+
