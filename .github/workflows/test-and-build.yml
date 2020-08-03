@@ -2,21 +2,19 @@ name: Testing environment
 on: push
 
 jobs:
-  # Label of the container job
-  test:
-    # Containers must run in Linux based operating systems
+  coverage:
+    name: coverage
     runs-on: ubuntu-latest
-    # Docker Hub image that `container-job` executes in
-    container: python:3.6
-
     steps:
-      # Downloads a copy of the code in your repository before running CI tests
-      - name: Check out repository code
-        uses: actions/checkout@v2
-        # Runs a script that creates a Redis client, populates
-        # the client with data, and retrieves data
-      - name: Run tests
-        run: make test
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@master
+        with:
+          python-version: "3.6"
+      - uses: paambaati/codeclimate-action@v2.5.3
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CodeClimate }}
+        with:
+          coverageCommand: make test
 
   build-n-publish:
     needs: test
@@ -37,18 +35,3 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.pypi_password }}
-
-  coverage:
-    needs: [test]
-    name: coverage
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@master
-        with:
-          python-version: "3.6"
-      - uses: paambaati/codeclimate-action@v2.5.3
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CodeClimate }}
-        with:
-          coverageCommand: coverage xml
