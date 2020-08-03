@@ -145,22 +145,23 @@ def monkeypatch(func_name: str = "to_json"):
     JSONEncoder.default = to_default  # Replace it.
 
 
-from flask.json import JSONEncoder
+# this part can only be used, if flask is installed. Use 
+try:
+    from flask.json import JSONEncoder
+    def get_encoder(func_name: str = "to_json"):
+        """ Module that monkey-patches json module when it's imported so
+        JSONEncoder.default() automatically checks for a special "to_json()"
+        method and uses it to encode the object if found.
+        """
 
+        class RDSEncoder(JSONEncoder):
+            def default(self, o):
+                method = getattr(o.__class__, func_name, JSONEncoder.default)
+                try:
+                    return method(o)
+                except:
+                    return method(self, o)
 
-def get_encoder(func_name: str = "to_json"):
-    """ Module that monkey-patches json module when it's imported so
-    JSONEncoder.default() automatically checks for a special "to_json()"
-    method and uses it to encode the object if found.
-    """
-
-    class RDSEncoder(JSONEncoder):
-        def default(self, o):
-            method = getattr(o.__class__, func_name, JSONEncoder.default)
-            try:
-                return method(o)
-            except:
-                return method(self, o)
-
-    return RDSEncoder
-
+        return RDSEncoder
+except:
+    pass

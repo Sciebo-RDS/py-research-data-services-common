@@ -17,6 +17,57 @@ from RDS import User
 user1 = User("Max Mustermann")
 ```
 
+## Installation
+
+```bash
+pip install research-data-services-common
+```
+
+### Optional dependencies
+
+If you want to work with flask, you can use some additional features, when it is installed.
+
+```bash
+pip install "research-data-services-common[flask]"
+```
+
+## JSONEncoder
+
+With flask installed, you can use the JSONEncoder for flask.
+
+```python
+from flask import Flask, jsonify
+from RDS import Util
+
+app = Flask(__name__)
+app.json_encoder = Util.get_encoder(func_name="to_dict")
+
+class Storage():
+    def to_dict(self):
+        return {"foo": "bar"}
+
+@app.route("/")
+def hello():
+    return jsonify(Storage())
+```
+
+If you want to use builtin json, you do not need flask. Then you can use *monkeypatch*-method.
+
+```python
+from RDS import Util
+import json
+
+class Storage():
+    def to_dict(self):
+        return {"foo": "bar"}
+
+Util.monkeypatch(func_name="to_dict")
+
+print(json.dumps(Storage())) # expects: '{"foo":"bar"}'
+```
+
+**Notice**: func_name defaults to *to_json*.
+
 ## Available Modules
 
 - User
