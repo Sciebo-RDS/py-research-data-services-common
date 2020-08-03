@@ -1,6 +1,7 @@
 import importlib
 import json
 
+
 def load_class_from_json(jsonStr: str):
     """
     Returns the class of the given json string.
@@ -33,6 +34,7 @@ def initialize_object_from_json(jsonStr: str):
     """
     return load_class_from_json(jsonStr).from_json(jsonStr)
 
+
 def initialize_object_from_dict(jsonDict: dict):
     """
     Initialize and returns an object of the given dict.
@@ -54,13 +56,13 @@ def internal_load_class(data: dict):
         try:
             klass = None
             if data["type"].endswith("Token"):
-                mod = importlib.import_module('RDS.Token')
+                mod = importlib.import_module("RDS.Token")
                 klass = getattr(mod, data["type"])
             elif data["type"].endswith("Service"):
-                mod = importlib.import_module('RDS.Service')
+                mod = importlib.import_module("RDS.Service")
                 klass = getattr(mod, data["type"])
             elif data["type"].endswith("User"):
-                mod = importlib.import_module('RDS.User')
+                mod = importlib.import_module("RDS.User")
                 klass = getattr(mod, data["type"])
 
             if klass is not None:
@@ -119,8 +121,25 @@ def try_function_on_dict(func: list):
             except Exception as e:
                 exp_list.append(e)
                 continue
-        
-        raise Exception("The given jsonDict raise in all functions an exception: \n{}".format(
-            "\n".join([f"Error: {type(e)}, Msg: {str(e)}" for e in exp_list])))
+
+        raise Exception(
+            "The given jsonDict raise in all functions an exception: \n{}".format(
+                "\n".join([f"Error: {type(e)}, Msg: {str(e)}" for e in exp_list])
+            )
+        )
 
     return inner_func
+
+
+def monkeypatch():
+    """ Module that monkey-patches json module when it's imported so
+    JSONEncoder.default() automatically checks for a special "to_json()"
+    method and uses it to encode the object if found.
+    """
+    from json import JSONEncoder, JSONDecoder
+
+    def to_default(self, obj):
+        return getattr(obj.__class__, "to_json", to_default.default)(obj)
+
+    to_default.default = JSONEncoder.default  # Save unmodified default.
+    JSONEncoder.default = to_default  # Replace it.
