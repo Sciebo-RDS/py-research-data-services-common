@@ -54,13 +54,13 @@ def internal_load_class(data: dict):
         try:
             klass = None
             if data["type"].endswith("Token"):
-                mod = importlib.import_module('lib.Token')
+                mod = importlib.import_module('RDS.Token')
                 klass = getattr(mod, data["type"])
             elif data["type"].endswith("Service"):
-                mod = importlib.import_module('lib.Service')
+                mod = importlib.import_module('RDS.Service')
                 klass = getattr(mod, data["type"])
             elif data["type"].endswith("User"):
-                mod = importlib.import_module('lib.User')
+                mod = importlib.import_module('RDS.User')
                 klass = getattr(mod, data["type"])
 
             if klass is not None:
