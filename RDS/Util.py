@@ -184,7 +184,15 @@ try:
     def wrap_monkeypatch(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
-            current_app.json_encoder = get_json_encoder()
+            key = "app"
+            if kwargs.get(key) is not None:
+                kwargs[key].json_encoder = get_json_encoder()
+                del kwargs[key]
+            else:
+                try:
+                    current_app.json_encoder = get_json_encoder()
+                except:
+                    pass
             return fn(*args, **kwargs)
 
         return wrapper
