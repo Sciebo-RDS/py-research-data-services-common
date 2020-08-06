@@ -145,20 +145,6 @@ def monkeypatch(func_name: str = "to_json"):
     JSONEncoder.default = to_default  # Replace it.
 
 
-def monkeypatch(func_name: str = "to_json"):
-    """ Module that monkey-patches json module when it's imported so
-    JSONEncoder.default() automatically checks for a special "to_json()"
-    method and uses it to encode the object if found.
-    """
-    from json import JSONEncoder, JSONDecoder
-
-    def to_default(self, obj):
-        return getattr(obj.__class__, func_name, to_default.default)(obj)
-
-    to_default.default = JSONEncoder.default  # Save unmodified default.
-    JSONEncoder.default = to_default  # Replace it.
-
-
 # this part can only be used, if flask is installed. See: https://github.com/Sciebo-RDS/py-research-data-services-common#optional-dependencies
 try:
     from flask.json import JSONEncoder
@@ -185,13 +171,14 @@ try:
         def wrapper(*args, **kwargs):
             key = "app"
             if kwargs.get(key) is not None:
-                kwargs[key].json_encoder = get_json_encoder()
+                app = kwargs[key]
                 del kwargs[key]
+                app.json_encoder = get_json_encoder(*args, **kwargs)
             else:
                 try:
                     from flask import current_app
 
-                    current_app.json_encoder = get_json_encoder()
+                    current_app.json_encoder = get_json_encoder(*args, **kwargs)
                 except:
                     pass
             return fn(*args, **kwargs)
