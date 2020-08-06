@@ -158,7 +158,7 @@ try:
 
         class RDSEncoder(JSONEncoder):
             def default(self, o):
-                method = getattr(o.__class__, func_name, JSONEncoder.default)
+                method = getattr(o, func_name, JSONEncoder.default)
                 try:
                     return method()
                 except:
