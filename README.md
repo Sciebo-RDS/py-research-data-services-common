@@ -68,18 +68,18 @@ print(json.dumps(Storage())) # expects: '{"foo":"bar"}'
 
 **Notice**: func_name defaults to *to_json*.
 
-### Monkeypatch JSON
+### Monkeypatch JSONEncoder in Flask
 
 If you want to monkeypatch json and flask, you can use the helper function *monkeypatch* from RDS.
 
-```bash
+```python
 from RDS import Util
 Util.monkeypatch()
 ```
 
 If it runs in a flask app context, it patches the app by itself. Otherwise you have to set the *app*-argument.
 
-```bash
+```python
 from flask import Flask
 app = Flask(__name__)
 
