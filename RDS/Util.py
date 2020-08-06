@@ -160,9 +160,12 @@ try:
             def default(self, o):
                 method = getattr(o.__class__, func_name, JSONEncoder.default)
                 try:
-                    return method(o)
+                    return method()
                 except:
-                    return method(self, o)
+                    try:
+                        return method(o)
+                    except:
+                        return method(self, o)
 
         return RDSEncoder
 
