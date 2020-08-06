@@ -189,7 +189,7 @@ try:
 
             return wrapper
 
-        wrap_monkeypatch(monkeypatch)
+        monkeypatch = wrap_monkeypatch(monkeypatch)
 
 
 except:
