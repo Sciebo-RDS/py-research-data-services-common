@@ -162,7 +162,6 @@ def monkeypatch(func_name: str = "to_json"):
 # this part can only be used, if flask is installed. See: https://github.com/Sciebo-RDS/py-research-data-services-common#optional-dependencies
 try:
     from flask.json import JSONEncoder
-    from flask import current_app
     from functools import wraps
 
     def get_json_encoder(func_name: str = "to_json"):
@@ -190,6 +189,8 @@ try:
                 del kwargs[key]
             else:
                 try:
+                    from flask import current_app
+
                     current_app.json_encoder = get_json_encoder()
                 except:
                     pass
