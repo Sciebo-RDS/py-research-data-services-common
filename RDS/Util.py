@@ -181,15 +181,15 @@ try:
 
         return RDSEncoder
 
-        def wrap_monkeypatch(fn):
-            @wraps(fn)
-            def wrapper(*args, **kwargs):
-                current_app.json_encoder = get_encoder()
-                return fn(*args, **kwargs)
+    def wrap_monkeypatch(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            current_app.json_encoder = get_encoder()
+            return fn(*args, **kwargs)
 
-            return wrapper
+        return wrapper
 
-        monkeypatch = wrap_monkeypatch(monkeypatch)
+    monkeypatch = wrap_monkeypatch(monkeypatch)
 
 
 except:
