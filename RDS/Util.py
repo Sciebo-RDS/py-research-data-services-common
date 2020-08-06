@@ -184,13 +184,12 @@ try:
     def wrap_monkeypatch(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
-            current_app.json_encoder = get_encoder()
+            current_app.json_encoder = get_json_encoder()
             return fn(*args, **kwargs)
 
         return wrapper
 
     monkeypatch = wrap_monkeypatch(monkeypatch)
-
 
 except:
     pass
