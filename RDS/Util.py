@@ -139,10 +139,7 @@ def monkeypatch(func_name: str = "to_json"):
     from json import JSONEncoder, JSONDecoder
 
     def to_default(self, obj):
-        try:
-            return getattr(obj.__class__, func_name, to_default.default)(obj)
-        except:
-            return getattr(obj.__class__, func_name, to_default.default)()
+        return getattr(obj.__class__, func_name, to_default.default)(obj)
 
     to_default.default = JSONEncoder.default  # Save unmodified default.
     JSONEncoder.default = to_default  # Replace it.
