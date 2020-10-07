@@ -239,9 +239,26 @@ class OAuth2Service(Service):
         """
 
         date = datetime.now() + timedelta(seconds=data["expires_in"])
-        new_token = OAuth2Token(
-            token.user, token.service, data["access_token"], data["refresh_token"], date
-        )
+        try:
+            new_token = OAuth2Token(
+                token.user,
+                token.service,
+                data["access_token"],
+                data["refresh_token"],
+                date,
+            )
+        except KeyError as e:
+            logger.error(e)
+            logger.debug("refresh_token still active.")
+
+            new_token = OAuth2Token(
+                token.user,
+                token.service,
+                data["access_token"],
+                token.refresh_token,
+                date,
+            )
+
         logger.debug(f"new token {new_token}")
         return new_token
 
