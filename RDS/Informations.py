@@ -1,3 +1,5 @@
+from enum import Enum
+
 class LoginMode(Enum):
     credentials = 0
     oauth = 1
