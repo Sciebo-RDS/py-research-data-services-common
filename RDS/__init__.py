@@ -2,6 +2,7 @@ from .User import *
 from .Service import *
 from . import ServiceException
 from .Token import *
+from .Informations import *
 import RDS.Util as Util
 
 
@@ -12,7 +13,7 @@ def int_or_str(value):
         return value
 
 
-__version__ = "0.18"
+__version__ = "0.19"
 VERSION = tuple(map(int_or_str, __version__.split(".")))
 
 __all__ = [
@@ -23,5 +24,7 @@ __all__ = [
     "OAuth2Token",
     "Util",
     "ServiceException",
+    "LoginMode",
+    "FileTransferMode"
 ]
 
