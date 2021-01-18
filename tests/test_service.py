@@ -201,6 +201,24 @@ class TestService(unittest.TestCase):
         )
         self.assertEqual(svc1, svc2, msg=f"Service1: {svc1}\n Service2: {svc2}")
 
+        svc2 = OAuth2Service(
+            "musterservice",
+            "http://localhost:5001",
+            "http://localhost:5001/oauth/refresh",
+            "ABC",
+            "XYZ",
+        )
+        self.assertEqual(svc1, svc2, msg=f"Service1: {svc1}\n Service2: {svc2}")
+
+        svc2 = OAuth2Service(
+            "musterService",
+            "http://localhost:5001",
+            "http://localhost:5001/oauth/refresh",
+            "ABC",
+            "XYZ",
+        )
+        self.assertEqual(svc1, svc2, msg=f"Service1: {svc1}\n Service2: {svc2}")
+
     def test_service_trailing_slash(self):
         # check if root dir is valid
         svc1 = OAuth2Service(

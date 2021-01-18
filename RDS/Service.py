@@ -22,7 +22,7 @@ class Service:
     def __init__(self, servicename: str, implements: list = None):
         self.check_string(servicename, "servicename")
 
-        self._servicename = servicename
+        self._servicename = servicename.lower()
 
         self._implements = implements
         if implements is None:
