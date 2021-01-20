@@ -13,18 +13,19 @@ def int_or_str(value):
         return value
 
 
-__version__ = "0.21"
+__version__ = "0.22"
 VERSION = tuple(map(int_or_str, __version__.split(".")))
 
 __all__ = [
     "User",
-    "Service",
+    "LoginService",
     "OAuth2Service",
     "Token",
     "OAuth2Token",
     "Util",
     "ServiceException",
     "LoginMode",
-    "FileTransferMode"
+    "FileTransferMode",
+    "FileTransferArchive"
 ]
 

@@ -1,5 +1,6 @@
 from .Token import Token, OAuth2Token
 from .User import User
+from .Informations import LoginMode, FileTransferMode, FileTransferArchive
 from urllib.parse import urlparse, urlunparse
 import requests
 import json
@@ -10,16 +11,48 @@ import logging
 logger = logging.getLogger()
 
 
-class Service:
+def initService(obj: Union[str, dict]):
+    """
+    Returns a Service or oauthService object for json String or dict.
+    """
+    if isinstance(obj, (LoginService, OAuth2Service)):
+        return obj
+
+    if not isinstance(obj, (str, dict)):
+        raise ValueError("Given object not from type str or dict.")
+
+    from RDS.Util import try_function_on_dict
+
+    load = try_function_on_dict(
+        [
+            OAuth2Service.from_json,
+            OAuth2Service.from_dict,
+            LoginService.from_json,
+            LoginService.from_dict,
+        ]
+    )
+    return load(obj)
+
+
+class BaseService:
     """
     Represents a service, which can be used in RDS.
-    This service only allows username:password authentication.
     """
 
     _servicename = None
     _implements = None
+    _fileTransferMode = None
+    _fileTransferArchive = None
 
-    def __init__(self, servicename: str, implements: list = None):
+    def __init__(self, servicename: str, implements: list, fileTransferMode: FileTransferMode = FileTransferMode.active, fileTransferArchive: FileTransferArchive = FileTransferArchive.none):
+        """Initialize Service without any authentication.
+
+        Args:
+            servicename (str): The name of the service, which will be registered. Must be unique.
+            implements (list, optional): Specified the implemented port endpoints. Defaults to empty list.
+            fileTransferMode (int, optional): Set the mode for transfering files. Defaults to 0=active. Alternative is 1=passive.
+            fileTransferArchive (str, optional): Set the archive, which is needed for transfering files. Defaults to "". Other value is "zip"
+        """
         self.check_string(servicename, "servicename")
 
         self._servicename = servicename.lower()
@@ -28,9 +61,31 @@ class Service:
         if implements is None:
             self._implements = []
 
+        valid_implements = ["fileStorage", "metadata"]
+
+        if len(self._implements) == 0 or len(self._implements) > 2:
+            raise ValueError(
+                "implements is empty or over 2 elements. Value: {}, Only valid: {}".format(len(self._implements), valid_implements))
+
+        for impl in self._implements:
+            if impl not in valid_implements:
+                raise ValueError("implements holds an invalid value: {}. Only valid: {}".format(
+                    impl, valid_implements))
+
+        self._fileTransferMode = fileTransferMode
+        self._fileTransferArchive = fileTransferArchive
+
     @property
     def servicename(self):
         return self._servicename
+
+    @property
+    def fileTransferMode(self):
+        return self._fileTransferMode
+
+    @property
+    def fileTransferArchive(self):
+        return self._fileTransferArchive
 
     @property
     def implements(self):
@@ -44,10 +99,16 @@ class Service:
         pass
 
     def __eq__(self, obj):
-        return isinstance(obj, (Service)) and self.servicename == obj.servicename
+        try:
+            return self.servicename == obj.servicename
+        except:
+            return False
 
     def __str__(self):
         return json.dumps(self)
+
+    def __repr__(self):
+        return json.dumps(self.to_dict())
 
     def to_json(self):
         """
@@ -62,7 +123,12 @@ class Service:
         Returns this object as a dict.
         """
 
-        data = {"servicename": self._servicename, "implements": self._implements}
+        data = {
+            "servicename": self._servicename,
+            "implements": self._implements,
+            "fileTransferMode": self.fileTransferMode.value,
+            "fileTransferArchive": self.fileTransferArchive.value
+        }
 
         return data
 
@@ -81,7 +147,7 @@ class Service:
         if "type" in data and str(data["type"]).endswith("Service") and "data" in data:
             data = data["data"]
             if "servicename" in data:
-                return Service(data["servicename"], data.get("implements"))
+                return BaseService(data["servicename"], data.get("implements"), FileTransferMode(data.get("fileTransferMode")), FileTransferArchive(data.get("fileTransferArchive")))
 
         raise ValueError("not a valid service json string.")
 
@@ -92,35 +158,138 @@ class Service:
         """
 
         try:
-            return Service(serviceDict["servicename"], serviceDict.get("implements"))
+            return BaseService(
+                serviceDict["servicename"],
+                serviceDict.get("implements"),
+                FileTransferMode(serviceDict.get("fileTransferMode")),
+                FileTransferArchive(serviceDict.get("fileTransferArchive"))
+            )
+
         except:
             raise ValueError("not a valid service dict")
 
-    @staticmethod
-    def init(obj: Union[str, dict]):
+
+class LoginService(BaseService):
+    _userId = None
+    _password = None
+
+    def __init__(
+        self,
+        servicename: str,
+        implements: list = None,
+        fileTransferMode: FileTransferMode = FileTransferMode.active,
+        fileTransferArchive: FileTransferArchive = FileTransferArchive.none,
+        userId: bool = True,
+        password: bool = True
+    ):
+        """Initialize Service with username:password authentication.
+
+        Args:
+            servicename (str): The name of the service, which will be registered. Must be unique.
+            implements (list, optional): Specified the implemented port endpoints. Defaults to empty list.
+            fileTransferMode (int, optional): Set the mode for transfering files. Defaults to 0=active. Alternative is 1=passive.
+            fileTransferArchive (str, optional): Set the archive, which is needed for transfering files. Defaults to "". Other value is "zip"
+            userId (bool, optional): Set True, if username is needed to work. Defaults to True.
+            password (bool, optional): Set True, if password is needed to work. Defaults to True.
         """
-        Returns a Service or oauthService object for json String or dict.
+        super().__init__(servicename, implements, fileTransferArchive, fileTransferArchive)
+
+        self._userId = userId
+        self._password = password
+
+    @property
+    def userId(self):
+        return self._userId
+
+    @property
+    def password(self):
+        return self._password
+
+    def to_json(self):
         """
-        if isinstance(obj, (Service, OAuth2Service)):
-            return obj
+        Returns this object as a json string.
+        """
 
-        if not isinstance(obj, (str, dict)):
-            raise ValueError("Given object not from type str or dict.")
+        data = super().to_json()
 
-        from RDS.Util import try_function_on_dict
+        data["type"] = self.__class__.__name__
+        data["data"].update(self.to_dict())
 
-        load = try_function_on_dict(
-            [
-                OAuth2Service.from_json,
-                Service.from_json,
-                OAuth2Service.from_dict,
-                Service.from_dict,
-            ]
+        return data
+
+    def to_dict(self):
+        """
+        Returns this object as a dict.
+        """
+        data = super().to_dict()
+        data["credentials"] = {
+            "userId": self.userId, "password": self.password
+        }
+
+        return data
+
+    @classmethod
+    def from_json(cls, serviceStr: str):
+        """
+        Returns an oauthservice object from a json string.
+        """
+
+        data = serviceStr
+        while (
+            type(data) is not dict
+        ):  # FIX for bug: JSON.loads sometimes returns a string
+            data = json.loads(data)
+
+        service = super().from_json(serviceStr)
+
+        try:
+            data = data["data"]
+            cred = data.get("credentials", {})
+
+            return cls.from_service(
+                service,
+                cred.get("userId", True),
+                cred.get("password", True)
+            )
+        except:
+            raise ValueError("not a valid oauthservice json string.")
+
+    @classmethod
+    def from_dict(cls, serviceDict: dict):
+        """
+        Returns an oauthservice object from a dict.
+        """
+
+        service = super().from_dict(serviceDict)
+
+        try:
+            cred = serviceDict.get("credentials", {})
+            return cls.from_service(
+                service,
+                cred.get("userId", True),
+                cred.get("password", True)
+            )
+        except:
+            raise ValueError("not a valid loginservice dict.")
+
+    @classmethod
+    def from_service(
+        cls,
+        service: BaseService,
+        userId: bool,
+        password: bool
+    ):
+        return cls(
+            service.servicename,
+            service.implements,
+            service.fileTransferMode,
+            service.fileTransferArchive,
+            userId,
+            password
         )
-        return load(obj)
 
 
-class OAuth2Service(Service):
+class OAuth2Service(BaseService):
     """
     Represents an OAuth2 service, which can be used in RDS.
     This service enables the oauth2 workflow.
@@ -133,14 +302,16 @@ class OAuth2Service(Service):
 
     def __init__(
         self,
-        servicename: str,
-        authorize_url: str,
-        refresh_url: str,
-        client_id: str,
-        client_secret: str,
+        servicename: str = "",
         implements: list = None,
+        fileTransferMode: FileTransferMode = FileTransferMode.active,
+        fileTransferArchive: FileTransferArchive = FileTransferArchive.none,
+        authorize_url: str = "",
+        refresh_url: str = "",
+        client_id: str = "",
+        client_secret: str = ""
     ):
-        super().__init__(servicename, implements)
+        super().__init__(servicename, implements, fileTransferArchive, fileTransferArchive)
 
         self.check_string(authorize_url, "authorize_url")
         self.check_string(refresh_url, "refresh_url")
@@ -281,7 +452,7 @@ class OAuth2Service(Service):
     @classmethod
     def from_service(
         cls,
-        service: Service,
+        service: BaseService,
         authorize_url: str,
         refresh_url: str,
         client_id: str,
@@ -292,21 +463,15 @@ class OAuth2Service(Service):
         """
         return cls(
             service.servicename,
+            service.implements, service.fileTransferMode, service.fileTransferArchive,
             authorize_url,
             refresh_url,
             client_id,
             client_secret,
-            service.implements,
         )
 
     def __eq__(self, obj):
-        return super().__eq__(obj) or (
-            isinstance(obj, (OAuth2Service))
-            and self.refresh_url == obj.refresh_url
-            and self.authorize_url == obj.authorize_url
-            and self.client_id == obj.client_id
-            and self.client_secret == obj.client_secret
-        )
+        return super().__eq__(obj)
 
     def to_json(self):
         """
@@ -344,7 +509,7 @@ class OAuth2Service(Service):
         ):  # FIX for bug: JSON.loads sometimes returns a string
             data = json.loads(data)
 
-        service = super(OAuth2Service, cls).from_json(serviceStr)
+        service = super().from_json(serviceStr)
 
         try:
             data = data["data"]
@@ -364,10 +529,10 @@ class OAuth2Service(Service):
         Returns an oauthservice object from a dict.
         """
 
-        service = super(OAuth2Service, cls).from_dict(serviceDict)
+        service = super().from_dict(serviceDict)
 
         try:
-            return OAuth2Service.from_service(
+            return cls.from_service(
                 service,
                 serviceDict["authorize_url"],
                 serviceDict["refresh_url"],

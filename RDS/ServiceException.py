@@ -1,10 +1,10 @@
-from .Service import Service
+from .Service import BaseService
 from .Token import Token, OAuth2Token
 from .User import User
 
 
 class TokenNotValidError(Exception):
-    def __init__(self, service: Service, token: Token, msg=None):
+    def __init__(self, service: BaseService, token: Token, msg=None):
         if msg is None:
             msg = f"{token} not valid for {service}"
 
@@ -75,7 +75,7 @@ class OAuth2UnsupportedGrantType(OAuth2UnsuccessfulResponseError):
 
 
 class ServiceExistsAlreadyError(Exception):
-    def __init__(self, service: Service, msg=None):
+    def __init__(self, service: BaseService, msg=None):
         if msg is None:
             msg = f"{service} already in storage."
 
@@ -84,7 +84,7 @@ class ServiceExistsAlreadyError(Exception):
 
 
 class ServiceNotExistsError(Exception):
-    def __init__(self, service: Service, msg=None):
+    def __init__(self, service: BaseService, msg=None):
         if msg is None:
             msg = f"{service} not found."
 

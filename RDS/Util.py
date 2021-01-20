@@ -1,6 +1,9 @@
 import importlib
 import json
+from .Service import initService
 
+def getServiceObject(obj):
+    return initService(obj)
 
 def load_class_from_json(jsonStr: str):
     """
@@ -114,11 +117,14 @@ def try_function_on_dict(func: list):
         nonlocal func
 
         exp_list = []
+        print(jsonDict)
 
         for f in func:
             try:
                 return f(jsonDict)
             except Exception as e:
+                import traceback 
+                traceback.print_exc() 
                 exp_list.append(e)
                 continue
 

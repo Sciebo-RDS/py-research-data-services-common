@@ -7,3 +7,7 @@ class LoginMode(Enum):
 class FileTransferMode(Enum):
     active = 0
     passive = 1
+
+class FileTransferArchive(Enum):
+    none = 0
+    zip = 1

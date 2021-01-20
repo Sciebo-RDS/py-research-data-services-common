@@ -16,13 +16,13 @@ class Token:
     def __init__(self, user: User, service, access_token: str):
         self.check_string(access_token, "access_token")
 
-        from RDS import Service
+        from RDS import BaseService
 
-        if not isinstance(service, Service):
+        if not isinstance(service, BaseService):
             raise ValueError(f"service parameter needs to be of type Service.")
 
-        self._user = user
         self._service = service
+        self._user = user
         self._access_token = access_token
 
     @staticmethod
@@ -102,11 +102,11 @@ class Token:
         """
         Returns a token object from a dict.
         """
-        from RDS import Service
+        from RDS import Util
 
         return Token(
             User.init(tokenDict["user"]),
-            Service.init(tokenDict["service"]),
+            Util.getServiceObject(tokenDict["service"]),
             tokenDict["access_token"],
         )
 
@@ -152,7 +152,7 @@ class OAuth2Token(Token):
         from RDS import OAuth2Service
 
         if not isinstance(service, OAuth2Service):
-            raise ValueError("parameter service is not an oauth2service")
+            raise ValueError("parameter service is not an oauth2service, was: {}".format(service.__class__.__name__))
 
         if expiration_date is None:
             expiration_date = datetime.datetime.now()
@@ -236,4 +236,3 @@ class OAuth2Token(Token):
             tokenDict["refresh_token"],
             tokenDict["expiration_date"],
         )
-
