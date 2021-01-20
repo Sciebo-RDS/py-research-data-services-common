@@ -3,6 +3,24 @@ import json
 from typing import Union
 from RDS import User
 
+def initToken(obj: Union[str, dict]):
+    if isinstance(obj, (Token, OAuth2Token)):
+        return obj
+
+    if not isinstance(obj, (str, dict)):
+        raise ValueError("Given object not from type str or dict.")
+
+    from RDS.Util import try_function_on_dict
+
+    load = try_function_on_dict(
+        [
+            OAuth2Token.from_json,
+            Token.from_json,
+            OAuth2Token.from_dict,
+            Token.from_dict,
+        ]
+    )
+    return load(obj)
 
 class Token:
     """
@@ -105,30 +123,10 @@ class Token:
         from RDS import Util
 
         return cls(
-            User.init(tokenDict["user"]),
+            Util.getUserObject(tokenDict["user"]),
             Util.getServiceObject(tokenDict["service"]),
             tokenDict["access_token"],
         )
-
-    @staticmethod
-    def init(obj: Union[str, dict]):
-        if isinstance(obj, (Token, OAuth2Token)):
-            return obj
-
-        if not isinstance(obj, (str, dict)):
-            raise ValueError("Given object not from type str or dict.")
-
-        from RDS.Util import try_function_on_dict
-
-        load = try_function_on_dict(
-            [
-                OAuth2Token.from_json,
-                Token.from_json,
-                OAuth2Token.from_dict,
-                Token.from_dict,
-            ]
-        )
-        return load(obj)
 
 class LoginToken(Token):
     """Provides a token object, which enforces service configuration.

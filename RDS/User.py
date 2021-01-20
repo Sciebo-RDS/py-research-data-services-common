@@ -1,6 +1,20 @@
 import json
 from typing import Union
 
+def initUser(obj: Union[str, dict]):
+    """
+    Returns a User object for json String or dict.
+    """
+    if isinstance(obj, (User)):
+        return obj
+
+    if not isinstance(obj, (str, dict)):
+        raise ValueError("Given object not from type str or dict.")
+
+    from RDS.Util import try_function_on_dict
+
+    load = try_function_on_dict([User.from_json, User.from_dict])
+    return load(obj)
 
 class User:
     """
@@ -69,20 +83,4 @@ class User:
         """
         Returns an user object from a dict.
         """
-        return User(userDict["username"])
-
-    @staticmethod
-    def init(obj: Union[str, dict]):
-        """
-        Returns a User object for json String or dict.
-        """
-        if isinstance(obj, (User)):
-            return obj
-
-        if not isinstance(obj, (str, dict)):
-            raise ValueError("Given object not from type str or dict.")
-
-        from RDS.Util import try_function_on_dict
-
-        load = try_function_on_dict([User.from_json, User.from_dict])
-        return load(obj)
+        return User(userDict["username"])    

@@ -114,3 +114,11 @@ class Test_Util(unittest.TestCase):
         self.assertEqual(
             Util.initialize_object_from_json(json.dumps(self.user1)), self.user1
         )
+
+    def test_init_objects(self):
+        self.assertEqual(Util.getServiceObject(json.dumps(self.oauthservice1)), self.oauthservice1)
+        svc1 = LoginService("MusterService", ["fileStorage"])
+        self.assertEqual(Util.getServiceObject(json.dumps(svc1)), svc1)
+        self.assertNotEqual(Util.getServiceObject(json.dumps(svc1)).__class__, self.oauthservice1.__class__)
+        self.assertEqual(Util.getUserObject(json.dumps(self.user1)), self.user1)
+        self.assertEqual(Util.getTokenObject(json.dumps(self.token1)), self.token1)

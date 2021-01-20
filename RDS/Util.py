@@ -1,9 +1,46 @@
 import importlib
 import json
 from .Service import initService
+from .User import initUser
+from .Token import initToken
+from typing import Union
 
-def getServiceObject(obj):
+
+def getServiceObject(obj: Union[str, dict]):
+    """Creates a service object, corresponding to the given object
+
+    Args:
+        obj (Union[str, dict]): The object needs to be a valid json or dictionary, created with to_json or to_dict method of a valid Service object
+
+    Returns:
+        BaseService: It is a Service object, which inherates from BaseService
+    """
     return initService(obj)
+
+
+def getUserObject(obj: Union[str, dict]):
+    """Creates a User object, corresponding to the given object
+
+    Args:
+        obj (Union[str, dict]): The object needs to be a valid json or dictionary, created with to_json or to_dict method of a valid User object
+
+    Returns:
+        User: It is a User object, which inherates from User
+    """
+    return initUser(obj)
+
+
+def getTokenObject(obj: Union[str, dict]):
+    """Creates a Token object, corresponding to the given object
+
+    Args:
+        obj (Union[str, dict]): The object needs to be a valid json or dictionary, created with to_json or to_dict method of a valid Token object
+
+    Returns:
+        Token: It is a Token object, which inherates Token
+    """
+    return initToken(obj)
+
 
 def load_class_from_json(jsonStr: str):
     """
@@ -127,7 +164,8 @@ def try_function_on_dict(func: list):
 
         raise Exception(
             "The given jsonDict raise in all functions an exception: \n{}".format(
-                "\n".join([f"Error: {type(e)}, Msg: {str(e)}" for e in exp_list])
+                "\n".join(
+                    [f"Error: {type(e)}, Msg: {str(e)}" for e in exp_list])
             )
         )
 
@@ -184,7 +222,8 @@ try:
                 try:
                     from flask import current_app
 
-                    current_app.json_encoder = get_json_encoder(*args, **kwargs)
+                    current_app.json_encoder = get_json_encoder(
+                        *args, **kwargs)
                 except:
                     pass
             return fn(*args, **kwargs)
