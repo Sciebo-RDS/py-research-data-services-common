@@ -20,7 +20,7 @@ __all__ = [
     "User",
     "LoginService",
     "OAuth2Service",
-    "Token",
+    "LoginToken",
     "OAuth2Token",
     "Util",
     "ServiceException",

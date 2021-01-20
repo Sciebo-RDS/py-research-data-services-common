@@ -1,7 +1,7 @@
 import unittest
 import json
 
-from RDS import Token, OAuth2Token, User, LoginService, OAuth2Service, FileTransferMode, FileTransferArchive
+from RDS import Token, LoginToken, OAuth2Token, User, LoginService, OAuth2Service, FileTransferMode, FileTransferArchive
 
 class TestToken(unittest.TestCase):
     def setUp(self):
@@ -59,7 +59,7 @@ class TestToken(unittest.TestCase):
         self.assertNotEqual(ot3, ot2)
         self.assertEqual(ot1, ot4)
 
-        self.assertEqual(t1, ot1)
+        self.assertNotEqual(t1, ot1)
 
     def test_token_empty_string(self):
         with self.assertRaises(ValueError):
@@ -106,10 +106,10 @@ class TestToken(unittest.TestCase):
         self.assertEqual(self.oauthtoken1, self.oauthtoken1)
         self.assertEqual(self.oauthtoken2, self.oauthtoken2)
 
-        self.assertEqual(
+        self.assertNotEqual(
             self.token1, self.oauthtoken1, msg=f"\n{self.token1}\n {self.oauthtoken1}"
         )
-        self.assertEqual(self.oauthtoken1, self.token1)
+        self.assertNotEqual(self.oauthtoken1, self.token1)
 
         self.assertIsInstance(self.oauthtoken1, Token)
 
@@ -130,3 +130,47 @@ class TestToken(unittest.TestCase):
         dump = json.dumps(self.oauthtoken1)
         # self.assertEqual(dump, json.dumps(expected))
         self.assertEqual(OAuth2Token.from_json(dump), self.oauthtoken1, msg=dump)
+
+    def test_logintoken(self):
+        user1 = User("Max Mustermann")
+        user2 = User("12345")
+
+        service1 = LoginService("MusterService", ["fileStorage"])
+        service2 = LoginService("BetonService", ["fileStorage"], userId=False)
+        service3 = LoginService("FahrService", ["fileStorage"], password=False)
+        service4 = LoginService("TaxiService", ["fileStorage"], userId=False, password=False)
+
+        with self.assertRaises(ValueError):
+            LoginToken(None, service1, "")
+
+        with self.assertRaises(ValueError):
+            LoginToken(user1, service1, "")
+
+        with self.assertRaises(ValueError):
+            LoginToken(None, service1, "DEF")
+
+        with self.assertRaises(ValueError):
+            LoginToken(None, service2, "")
+
+        with self.assertRaises(ValueError):
+            LoginToken(user1, service2, "")
+
+        LoginToken(None, service2, "DEF")
+
+        with self.assertRaises(ValueError):
+            LoginToken(None, service3, "")
+
+        LoginToken(user1, service3, "")
+        LoginToken(user1, service3, None)
+        LoginToken(user1, service3, "DEF")
+
+        with self.assertRaises(ValueError):
+            LoginToken(None, service3, "DEF")
+
+        LoginToken(None, service4, None)
+        LoginToken(None, service4, "")
+        LoginToken(user1, service4, "")
+        LoginToken(None, service4, "DEF")
+        
+        Token(user1, service1, "DEF")
+        Token(user1, service3, "DEF")

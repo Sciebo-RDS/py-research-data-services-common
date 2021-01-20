@@ -6,7 +6,7 @@ from RDS import User
 
 class Token:
     """
-    This token represents a simple password.
+    This token represents a simple username:password, but will not enforce anything for service.
     """
 
     _service = None
@@ -54,7 +54,7 @@ class Token:
         Returns True, if this object and other object have the same servicename and user. Otherwise false.
         """
         return (
-            isinstance(other, (Token))
+            isinstance(other, (self.__class__))
             and self.service == other.service
             and self.user == other.user
         )
@@ -104,7 +104,7 @@ class Token:
         """
         from RDS import Util
 
-        return Token(
+        return cls(
             User.init(tokenDict["user"]),
             Util.getServiceObject(tokenDict["service"]),
             tokenDict["access_token"],
@@ -129,6 +129,30 @@ class Token:
             ]
         )
         return load(obj)
+
+class LoginToken(Token):
+    """Provides a token object, which enforces service configuration.
+    """
+
+    def __init__(
+        self,
+        user: User,
+        service,
+        access_token: str
+    ):
+        super().__init__(user, service, "---") # Workaround for empty passwords in LoginTokens
+        self._access_token = access_token
+
+        from RDS import LoginService
+        
+        if not isinstance(service, LoginService):
+            raise ValueError("parameter service is not a LoginService, was: {}".format(service.__class__.__name__))
+
+        if service.userId and self.user is None:
+            raise ValueError("user is needed, because username must be provided for specified service.")
+
+        if service.password and (self.access_token is None or not self.access_token):
+            raise ValueError("access_token is needed, because password must be provided for specified service.")
 
 
 class OAuth2Token(Token):
