@@ -1,37 +1,38 @@
 import unittest
 import json
 
-from RDS import Token, OAuth2Token, User, Service, OAuth2Service
-
+from RDS import Token, OAuth2Token, User, LoginService, OAuth2Service, FileTransferMode, FileTransferArchive
 
 class TestToken(unittest.TestCase):
     def setUp(self):
         self.user1 = User("Max Mustermann")
         self.user2 = User("12345")
 
-        self.service1 = Service("MusterService")
-        self.service2 = Service("BetonService")
+        self.service1 = LoginService("MusterService", ["fileStorage"])
+        self.service2 = LoginService("BetonService", ["fileStorage"])
 
         self.token1 = Token(self.user1, self.service1, "ABC")
         self.token2 = Token(self.user1, self.service2, "DEF")
 
         self.oauthservice1 = OAuth2Service(
-            "MusterService",
+            "MusterService", ["fileStorage"], FileTransferMode.active, FileTransferArchive.none,
             "http://localhost/oauth/authorize",
             "http://localhost/oauth/token",
             "MNO",
             "UVW",
         )
         self.oauthservice2 = OAuth2Service(
-            "BetonService",
+            "BetonService", ["fileStorage"], FileTransferMode.active, FileTransferArchive.none,
             "http://owncloud/oauth/authorize",
             "http://owncloud/oauth/token",
             "UVP",
             "OMN",
         )
 
-        self.oauthtoken1 = OAuth2Token(self.user1, self.oauthservice1, "ABC", "XYZ")
-        self.oauthtoken2 = OAuth2Token(self.user1, self.oauthservice2, "DEF", "UVW")
+        self.oauthtoken1 = OAuth2Token(
+            self.user1, self.oauthservice1, "ABC", "XYZ")
+        self.oauthtoken2 = OAuth2Token(
+            self.user1, self.oauthservice2, "DEF", "UVW")
 
     def test_compare_tokens(self):
         t1 = Token(self.user1, self.service1, "ABC")
@@ -77,7 +78,8 @@ class TestToken(unittest.TestCase):
         self.assertIsInstance(
             OAuth2Token(self.user1, self.oauthservice1, "ABC"), OAuth2Token
         )
-        self.assertIsInstance(OAuth2Token(self.user1, self.oauthservice2, "ABC"), Token)
+        self.assertIsInstance(OAuth2Token(
+            self.user1, self.oauthservice2, "ABC"), Token)
 
         with self.assertRaises(ValueError):
             OAuth2Token(self.user1, self.oauthservice1, "")
@@ -127,4 +129,4 @@ class TestToken(unittest.TestCase):
         }
         dump = json.dumps(self.oauthtoken1)
         # self.assertEqual(dump, json.dumps(expected))
-        self.assertEqual(OAuth2Token.from_json(dump), self.oauthtoken1)
+        self.assertEqual(OAuth2Token.from_json(dump), self.oauthtoken1, msg=dump)

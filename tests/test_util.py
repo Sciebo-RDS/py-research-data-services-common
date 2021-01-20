@@ -1,13 +1,13 @@
 import unittest
 import json
 
-from RDS import Service, OAuth2Service, User, Token, OAuth2Token, Util
+from RDS import LoginService, OAuth2Service, User, Token, OAuth2Token, Util
 
 
 class Test_Util(unittest.TestCase):
     def setUp(self):
-        self.service1 = Service("MusterService")
-        self.service2 = Service("BetonService")
+        self.service1 = LoginService("MusterService", ["fileStorage"])
+        self.service2 = LoginService("BetonService", ["fileStorage"])
         self.oauthservice1 = OAuth2Service.from_service(
             self.service1,
             "http://localhost:5000/oauth/authorize",
