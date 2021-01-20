@@ -1,9 +1,12 @@
 import importlib
 import json
-from .Service import initService
+from .Service import initService, BaseService, LoginService, OAuth2Service
 from .User import initUser
 from .Token import initToken
 from typing import Union
+import os, requests, logging
+
+logger = logging.getLogger()
 
 
 def getServiceObject(obj: Union[str, dict]):
@@ -41,6 +44,49 @@ def getTokenObject(obj: Union[str, dict]):
     """
     return initToken(obj)
 
+def register_service(
+    service: BaseService
+):
+    """Register the given service to Token Storage
+
+    Args:
+        service (BaseService): The Service, which will be registered in Token Storage
+
+    Raises:
+        Exception: Raises, when there is something wrong in registering process.
+
+    Returns:
+        Bool: Returns True, when success, Otherwise False or raise Exception
+    """
+    tokenStorage = os.getenv("CENTRAL_SERVICE_TOKEN_STORAGE")
+    if tokenStorage is None:
+        return False
+
+    data = service.to_dict()
+    headers = {"Content-Type": "application/json"}
+
+    response = requests.post(
+        f"{tokenStorage}/service",
+        json=data,
+        headers=headers,
+        verify=(os.environ.get("VERIFY_SSL", "True") == "True"),
+    )
+
+    if response.status_code != 200:
+        raise Exception(
+            "Cannot find and register Token Storage, msg:\n{}".format(response.text)
+        )
+
+    response = response.json()
+    if response["success"]:
+        logger.info(f"Registering {service.servicename} in token storage was successful.")
+        return True
+
+    logger.error(
+        f"There was an error while registering {service.servicename} to token storage.\nJSON: {response}"
+    )
+
+    return False
 
 def load_class_from_json(jsonStr: str):
     """
