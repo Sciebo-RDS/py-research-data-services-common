@@ -44,7 +44,7 @@ class BaseService:
     _fileTransferMode = None
     _fileTransferArchive = None
 
-    def __init__(self, servicename: str, implements: list, fileTransferMode: FileTransferMode = FileTransferMode.active, fileTransferArchive: FileTransferArchive = FileTransferArchive.none):
+    def __init__(self, servicename: str, implements: list = None, fileTransferMode: FileTransferMode = FileTransferMode.active, fileTransferArchive: FileTransferArchive = FileTransferArchive.none):
         """Initialize Service without any authentication.
 
         Args:

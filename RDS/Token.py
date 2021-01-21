@@ -3,6 +3,7 @@ import json
 from typing import Union
 from RDS import User
 
+
 def initToken(obj: Union[str, dict]):
     if isinstance(obj, (Token, OAuth2Token)):
         return obj
@@ -21,6 +22,7 @@ def initToken(obj: Union[str, dict]):
         ]
     )
     return load(obj)
+
 
 class Token:
     """
@@ -72,7 +74,7 @@ class Token:
         Returns True, if this object and other object have the same servicename and user. Otherwise false.
         """
         return (
-            isinstance(other, (self.__class__))
+            isinstance(other, (Token))
             and self.service == other.service
             and self.user == other.user
         )
@@ -128,6 +130,7 @@ class Token:
             tokenDict["access_token"],
         )
 
+
 class LoginToken(Token):
     """Provides a token object, which enforces service configuration.
     """
@@ -138,19 +141,23 @@ class LoginToken(Token):
         service,
         access_token: str
     ):
-        super().__init__(user, service, "---") # Workaround for empty passwords in LoginTokens
+        # Workaround for empty passwords in LoginTokens
+        super().__init__(user, service, "---")
         self._access_token = access_token
 
         from RDS import LoginService
-        
+
         if not isinstance(service, LoginService):
-            raise ValueError("parameter service is not a LoginService, was: {}".format(service.__class__.__name__))
+            raise ValueError("parameter service is not a LoginService, was: {}".format(
+                service.__class__.__name__))
 
         if service.userId and self.user is None:
-            raise ValueError("user is needed, because username must be provided for specified service.")
+            raise ValueError(
+                "user is needed, because username must be provided for specified service.")
 
         if service.password and (self.access_token is None or not self.access_token):
-            raise ValueError("access_token is needed, because password must be provided for specified service.")
+            raise ValueError(
+                "access_token is needed, because password must be provided for specified service.")
 
 
 class OAuth2Token(Token):
@@ -174,7 +181,8 @@ class OAuth2Token(Token):
         from RDS import OAuth2Service
 
         if not isinstance(service, OAuth2Service):
-            raise ValueError("parameter service is not an oauth2service, was: {}".format(service.__class__.__name__))
+            raise ValueError("parameter service is not an oauth2service, was: {}".format(
+                service.__class__.__name__))
 
         if expiration_date is None:
             expiration_date = datetime.datetime.now()
