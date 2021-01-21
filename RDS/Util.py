@@ -4,7 +4,9 @@ from .Service import initService, BaseService, LoginService, OAuth2Service
 from .User import initUser
 from .Token import initToken
 from typing import Union
-import os, requests, logging
+import os
+import requests
+import logging
 
 logger = logging.getLogger()
 
@@ -44,6 +46,32 @@ def getTokenObject(obj: Union[str, dict]):
     """
     return initToken(obj)
 
+
+def loadToken(userId: str, service: BaseService) -> str:
+    # FIXME make localhost dynamic for pactman
+    tokenStorageURL = os.getenv(
+        "USE_CASE_SERVICE_PORT_SERVICE", "http://localhost:3000"
+    )
+    # load access token from token-storage
+    result = requests.get(
+        f"{tokenStorageURL}/user/{userId}/service/{service.servicename}",
+        verify=(os.environ.get("VERIFY_SSL", "True") == "True"),
+    )
+
+    if result.status_code > 200:
+        return None
+
+    access_token = result.json()
+    logger.debug(f"got: {access_token}")
+
+    token = getTokenObject(access_token)
+
+    logger.debug("initialize type: {}, data: {}".format(
+        token.__class__.__name__, token.to_json()))
+
+    return token
+
+
 def register_service(
     service: BaseService
 ):
@@ -74,12 +102,14 @@ def register_service(
 
     if response.status_code != 200:
         raise Exception(
-            "Cannot find and register Token Storage, msg:\n{}".format(response.text)
+            "Cannot find and register Token Storage, msg:\n{}".format(
+                response.text)
         )
 
     response = response.json()
     if response["success"]:
-        logger.info(f"Registering {service.servicename} in token storage was successful.")
+        logger.info(
+            f"Registering {service.servicename} in token storage was successful.")
         return True
 
     logger.error(
@@ -87,6 +117,7 @@ def register_service(
     )
 
     return False
+
 
 def load_class_from_json(jsonStr: str):
     """
