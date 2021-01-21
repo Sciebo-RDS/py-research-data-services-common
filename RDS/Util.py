@@ -47,14 +47,19 @@ def getTokenObject(obj: Union[str, dict]):
     return initToken(obj)
 
 
-def loadToken(userId: str, service: BaseService) -> str:
+def loadToken(userId: str, service: Union[str, BaseService]) -> str:
     # FIXME make localhost dynamic for pactman
     tokenStorageURL = os.getenv(
         "USE_CASE_SERVICE_PORT_SERVICE", "http://localhost:3000"
     )
     # load access token from token-storage
+    try:
+        servicename = service.servicename
+    except:
+        servicename = service
+
     result = requests.get(
-        f"{tokenStorageURL}/user/{userId}/service/{service.servicename}",
+        f"{tokenStorageURL}/user/{userId}/service/{servicename}",
         verify=(os.environ.get("VERIFY_SSL", "True") == "True"),
     )
 
