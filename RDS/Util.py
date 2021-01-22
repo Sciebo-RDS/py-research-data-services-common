@@ -245,7 +245,8 @@ def try_function_on_dict(func: list):
                 continue
 
         raise Exception(
-            "The given jsonDict raise in all functions an exception: \n{}".format(
+            "The given jsonDict raise in all functions an exception.\ndata: {}, errors: \n{}".format(
+                jsonDict,
                 "\n".join(
                     [f"Error: {type(e)}, Msg: {str(e)}" for e in exp_list])
             )
