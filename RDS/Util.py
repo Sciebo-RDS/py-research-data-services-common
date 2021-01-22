@@ -31,7 +31,8 @@ def parseUserId(obj: str):
 def parseToken(token: Token):
     serviceport = "port-{}".format(token.service.servicename)
     data = {
-        "userId": "{}://{}:{}".format(serviceport, token.user.username, token.access_token)}
+        "userId": "{}://{}:{}".format(serviceport, token.user.username, token.access_token)
+    }
 
     return data
 
