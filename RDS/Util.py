@@ -2,13 +2,38 @@ import importlib
 import json
 from .Service import initService, BaseService, LoginService, OAuth2Service
 from .User import initUser
-from .Token import initToken
+from .Token import initToken, Token
 from typing import Union
 import os
 import requests
 import logging
 
 logger = logging.getLogger()
+
+
+def parseUserId(obj: str):
+    service, user = obj.split("://")
+    userId, password = user.split(":")
+    service = service.replace("port-", "")
+
+    if password == "None":
+        password = None
+
+    if userId == "":
+        userId = None
+
+    if password == "":
+        password = None
+
+    return service, userId, password
+
+
+def parseToken(token: Token):
+    serviceport = "port-{}".format(token.service.servicename)
+    data = {
+        "userId": "{}://{}:{}".format(serviceport, token.user.username, token.access_token)}
+
+    return data
 
 
 def getServiceObject(obj: Union[str, dict]):

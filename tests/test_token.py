@@ -59,7 +59,7 @@ class TestToken(unittest.TestCase):
         self.assertNotEqual(ot3, ot2)
         self.assertEqual(ot1, ot4)
 
-        self.assertNotEqual(t1, ot1)
+        self.assertEqual(t1, ot1)
 
     def test_token_empty_string(self):
         with self.assertRaises(ValueError):
@@ -106,10 +106,10 @@ class TestToken(unittest.TestCase):
         self.assertEqual(self.oauthtoken1, self.oauthtoken1)
         self.assertEqual(self.oauthtoken2, self.oauthtoken2)
 
-        self.assertNotEqual(
+        self.assertEqual(
             self.token1, self.oauthtoken1, msg=f"\n{self.token1}\n {self.oauthtoken1}"
         )
-        self.assertNotEqual(self.oauthtoken1, self.token1)
+        self.assertEqual(self.oauthtoken1, self.token1)
 
         self.assertIsInstance(self.oauthtoken1, Token)
 

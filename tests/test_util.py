@@ -30,8 +30,10 @@ class Test_Util(unittest.TestCase):
         self.token1 = Token(self.user1, self.service1, "ABC")
         self.token2 = Token(self.user1, self.service2, "DEF")
 
-        self.oauthtoken1 = OAuth2Token(self.user1, self.oauthservice1, "ABC", "XYZ")
-        self.oauthtoken2 = OAuth2Token(self.user1, self.oauthservice2, "DEF", "UVW")
+        self.oauthtoken1 = OAuth2Token(
+            self.user1, self.oauthservice1, "ABC", "XYZ")
+        self.oauthtoken2 = OAuth2Token(
+            self.user1, self.oauthservice2, "DEF", "UVW")
 
     def test_invalid_input(self):
         with self.assertRaises(ValueError):
@@ -79,7 +81,8 @@ class Test_Util(unittest.TestCase):
         )
 
         self.assertEqual(
-            Util.load_class_from_json(json.dumps(self.token1)), self.token1.__class__
+            Util.load_class_from_json(json.dumps(
+                self.token1)), self.token1.__class__
         )
         self.assertEqual(
             Util.load_class_from_json(json.dumps(self.oauthtoken1)),
@@ -87,7 +90,8 @@ class Test_Util(unittest.TestCase):
         )
 
         self.assertEqual(
-            Util.load_class_from_json(json.dumps(self.user1)), self.user1.__class__
+            Util.load_class_from_json(json.dumps(
+                self.user1)), self.user1.__class__
         )
 
     def test_load_class_from_dict(self):
@@ -96,7 +100,8 @@ class Test_Util(unittest.TestCase):
 
     def test_initialize_object(self):
         self.assertEqual(
-            Util.initialize_object_from_json(json.dumps(self.token1)), self.token1
+            Util.initialize_object_from_json(
+                json.dumps(self.token1)), self.token1
         )
         self.assertEqual(
             Util.initialize_object_from_json(json.dumps(self.oauthtoken1)),
@@ -104,7 +109,8 @@ class Test_Util(unittest.TestCase):
         )
 
         self.assertEqual(
-            Util.initialize_object_from_json(json.dumps(self.service1)), self.service1
+            Util.initialize_object_from_json(
+                json.dumps(self.service1)), self.service1
         )
         self.assertEqual(
             Util.initialize_object_from_json(json.dumps(self.oauthservice1)),
@@ -112,13 +118,47 @@ class Test_Util(unittest.TestCase):
         )
 
         self.assertEqual(
-            Util.initialize_object_from_json(json.dumps(self.user1)), self.user1
+            Util.initialize_object_from_json(
+                json.dumps(self.user1)), self.user1
         )
 
     def test_init_objects(self):
-        self.assertEqual(Util.getServiceObject(json.dumps(self.oauthservice1)), self.oauthservice1)
+        self.assertEqual(Util.getServiceObject(
+            json.dumps(self.oauthservice1)), self.oauthservice1)
         svc1 = LoginService("MusterService", ["fileStorage"])
         self.assertEqual(Util.getServiceObject(json.dumps(svc1)), svc1)
-        self.assertNotEqual(Util.getServiceObject(json.dumps(svc1)).__class__, self.oauthservice1.__class__)
-        self.assertEqual(Util.getUserObject(json.dumps(self.user1)), self.user1)
-        self.assertEqual(Util.getTokenObject(json.dumps(self.token1)), self.token1)
+        self.assertNotEqual(Util.getServiceObject(
+            json.dumps(svc1)).__class__, self.oauthservice1.__class__)
+        self.assertEqual(Util.getUserObject(
+            json.dumps(self.user1)), self.user1)
+        self.assertEqual(Util.getTokenObject(
+            json.dumps(self.token1)), self.token1)
+
+    def test_parseUserId(self):
+        user = ("owncloud", "admin", "huhu")
+        example = "port-{}://{}:{}".format(*user)
+        self.assertEqual(Util.parseUserId(example), user)
+
+        user = ("owncloud", "admin", None)
+        example = "port-{}://{}:{}".format(*user)
+        self.assertEqual(Util.parseUserId(example), user)
+
+        user = ("owncloud", "admin", "None")
+        example = "port-{}://{}:{}".format(*user)
+        self.assertEqual(Util.parseUserId(example),
+                         ("owncloud", "admin", None))
+
+        user = ("owncloud", "", "")
+        example = "port-{}://{}:{}".format(*user)
+        self.assertEqual(Util.parseUserId(example), ("owncloud", None, None))
+
+    def test_parseToken(self):
+        user1 = User("MaxMustermann")
+        service1 = LoginService("MusterService", ["fileStorage"])
+        token1 = Token(user1, service1, "ABC")
+
+        serviceport = "port-{}".format(token1.service.servicename)
+        data = {
+            "userId": "{}://{}:{}".format("port-musterservice", "MaxMustermann", "ABC")}
+
+        self.assertEqual(Util.parseToken(token1), data)
