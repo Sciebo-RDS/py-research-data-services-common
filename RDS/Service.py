@@ -161,8 +161,8 @@ class BaseService:
             return BaseService(
                 serviceDict["servicename"],
                 serviceDict.get("implements", ["metadata"]),
-                FileTransferMode(serviceDict.get("fileTransferMode"), 0),
-                FileTransferArchive(serviceDict.get("fileTransferArchive"), 0)
+                FileTransferMode(serviceDict.get("fileTransferMode", 0)),
+                FileTransferArchive(serviceDict.get("fileTransferArchive", 0))
             )
 
         except:
