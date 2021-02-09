@@ -136,20 +136,24 @@ class Test_Util(unittest.TestCase):
 
     def test_parseUserId(self):
         user = ("owncloud", "admin", "huhu")
-        example = "port-{}://{}:{}".format(*user)
+        example = "{}://{}:{}".format(*user)
+        self.assertEqual(Util.parseUserId(example), user)
+
+        user = ("owncloud", "admin", "huhu")
+        example = "{}://{}:{}".format(*user)
         self.assertEqual(Util.parseUserId(example), user)
 
         user = ("owncloud", "admin", None)
-        example = "port-{}://{}:{}".format(*user)
+        example = "{}://{}:{}".format(*user)
         self.assertEqual(Util.parseUserId(example), user)
 
         user = ("owncloud", "admin", "None")
-        example = "port-{}://{}:{}".format(*user)
+        example = "{}://{}:{}".format(*user)
         self.assertEqual(Util.parseUserId(example),
                          ("owncloud", "admin", None))
 
         user = ("owncloud", "", "")
-        example = "port-{}://{}:{}".format(*user)
+        example = "{}://{}:{}".format(*user)
         self.assertEqual(Util.parseUserId(example), ("owncloud", None, None))
 
     def test_parseToken(self):
@@ -157,8 +161,8 @@ class Test_Util(unittest.TestCase):
         service1 = LoginService("MusterService", ["fileStorage"])
         token1 = Token(user1, service1, "ABC")
 
-        serviceport = "port-{}".format(token1.service.servicename)
+        serviceport = "{}".format(token1.service.servicename)
         data = {
-            "userId": "{}://{}:{}".format("port-musterservice", "MaxMustermann", "ABC")}
+            "userId": "{}://{}:{}".format("musterservice", "MaxMustermann", "ABC")}
 
         self.assertEqual(Util.parseToken(token1), data)

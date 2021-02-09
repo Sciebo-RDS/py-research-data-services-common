@@ -13,7 +13,7 @@ def int_or_str(value):
         return value
 
 
-__version__ = "0.30"
+__version__ = "0.31"
 VERSION = tuple(map(int_or_str, __version__.split(".")))
 
 __all__ = [

@@ -12,6 +12,7 @@ logger = logging.getLogger()
 
 
 def parseUserId(obj: str):
+    # TODO: add regex here (\S+):\/\/(\S+?):(\S+)
     service, user = obj.split("://")
     userId, password = user.split(":")
     service = service.replace("port-", "")
@@ -29,7 +30,7 @@ def parseUserId(obj: str):
 
 
 def parseToken(token: Token):
-    serviceport = "port-{}".format(token.service.servicename)
+    serviceport = "{}".format(token.service.servicename)
     data = {
         "userId": "{}://{}:{}".format(serviceport, token.user.username, token.access_token)
     }
