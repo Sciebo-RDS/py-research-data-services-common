@@ -31,6 +31,9 @@ def parseUserId(obj: str):
 
 def parseToken(token: Token):
     serviceport = "{}".format(token.service.servicename)
+    if not "port" in serviceport:
+        serviceport = "port-{}".format(serviceport)
+
     data = {
         "userId": "{}://{}:{}".format(serviceport, token.user.username, token.access_token)
     }
