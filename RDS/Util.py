@@ -33,7 +33,7 @@ def parseUserId(obj: str):
 
 def parseToken(token: Token):
     serviceport = "{}".format(token.service.servicename)
-    if not "port" in serviceport:
+    if not "port-" in serviceport:
         serviceport = "port-{}".format(serviceport)
 
     data = {
