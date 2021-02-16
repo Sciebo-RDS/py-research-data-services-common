@@ -148,8 +148,8 @@ class BaseService:
 
         if "type" in data and str(data["type"]).endswith("Service") and "data" in data:
             data = data["data"]
-            if "servicename" in data:
-                return BaseService(data["servicename"], data.get("implements"), FileTransferMode(data.get("fileTransferMode")), FileTransferArchive(data.get("fileTransferArchive")))
+
+            return BaseService(data["servicename"], data.get("implements"), FileTransferMode(data.get("fileTransferMode", 0)), FileTransferArchive(data.get("fileTransferArchive", 0)))
 
         raise ValueError("not a valid service json string.")
 
@@ -194,7 +194,7 @@ class LoginService(BaseService):
             userId (bool, optional): Set True, if username is needed to work. Defaults to True.
             password (bool, optional): Set True, if password is needed to work. Defaults to True.
         """
-        super().__init__(servicename, implements, fileTransferArchive, fileTransferArchive)
+        super().__init__(servicename, implements, fileTransferMode, fileTransferArchive)
 
         self._userId = userId
         self._password = password
@@ -313,7 +313,7 @@ class OAuth2Service(BaseService):
         client_id: str = "",
         client_secret: str = ""
     ):
-        super().__init__(servicename, implements, fileTransferArchive, fileTransferArchive)
+        super().__init__(servicename, implements, fileTransferMode, fileTransferArchive)
 
         self.check_string(authorize_url, "authorize_url")
         self.check_string(refresh_url, "refresh_url")
