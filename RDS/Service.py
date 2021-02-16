@@ -520,7 +520,7 @@ class OAuth2Service(BaseService):
                 data["authorize_url"],
                 data["refresh_url"],
                 data["client_id"],
-                data["client_secret"],
+                data.get("client_secret", ""),
             )
         except:
             raise ValueError("not a valid oauthservice json string.")
@@ -539,7 +539,7 @@ class OAuth2Service(BaseService):
                 serviceDict["authorize_url"],
                 serviceDict["refresh_url"],
                 serviceDict["client_id"],
-                serviceDict["client_secret"],
+                serviceDict.get("client_secret", ""),
             )
         except:
             raise ValueError("not a valid oauthservice dict.")

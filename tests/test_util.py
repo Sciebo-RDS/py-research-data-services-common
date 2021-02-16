@@ -135,30 +135,32 @@ class Test_Util(unittest.TestCase):
             json.dumps(self.token1)), self.token1)
 
     def test_parseUserId(self):
-        user = ("owncloud", "admin", "huhu")
+        user = ("port-owncloud", "admin", "huhu")
         example = "{}://{}:{}".format(*user)
         self.assertEqual(Util.parseUserId(example), user)
 
-        user = ("owncloud", "admin", "huhu")
+        user = ("port-owncloud", "admin", "huhu")
         example = "{}://{}:{}".format(*user)
         self.assertEqual(Util.parseUserId(example), user)
 
-        user = ("owncloud", "admin", None)
+        user = ("port-owncloud", "admin", None)
         example = "{}://{}:{}".format(*user)
         self.assertEqual(Util.parseUserId(example), user)
 
-        user = ("owncloud", "admin", "None")
+        user = ("port-owncloud", "admin", "None")
         example = "{}://{}:{}".format(*user)
         self.assertEqual(Util.parseUserId(example),
-                         ("owncloud", "admin", None))
+                         ("port-owncloud", "admin", None))
 
-        user = ("owncloud", "", "")
+        user = ("port-owncloud", "", "")
         example = "{}://{}:{}".format(*user)
-        self.assertEqual(Util.parseUserId(example), ("owncloud", None, None))
+        self.assertEqual(Util.parseUserId(example),
+                         ("port-owncloud", None, None))
 
-        user = ("owncloud", "", "")
-        example = "port-{}://{}:{}".format(*user)
-        self.assertEqual(Util.parseUserId(example), ("owncloud", None, None))
+        user = ("port-owncloud", "", "")
+        example = "{}://{}:{}".format(*user)
+        self.assertEqual(Util.parseUserId(example),
+                         ("port-owncloud", None, None))
 
     def test_parseToken(self):
         user1 = User("MaxMustermann")
