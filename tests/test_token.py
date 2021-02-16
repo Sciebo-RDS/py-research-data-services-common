@@ -1,7 +1,8 @@
 import unittest
 import json
 
-from RDS import Token, LoginToken, OAuth2Token, User, LoginService, OAuth2Service, FileTransferMode, FileTransferArchive
+from RDS import Token, LoginToken, OAuth2Token, User, LoginService, OAuth2Service, FileTransferMode, FileTransferArchive, BaseService
+
 
 class TestToken(unittest.TestCase):
     def setUp(self):
@@ -15,14 +16,16 @@ class TestToken(unittest.TestCase):
         self.token2 = Token(self.user1, self.service2, "DEF")
 
         self.oauthservice1 = OAuth2Service(
-            "MusterService", ["fileStorage"], FileTransferMode.active, FileTransferArchive.none,
+            "MusterService", [
+                "fileStorage"], FileTransferMode.active, FileTransferArchive.none,
             "http://localhost/oauth/authorize",
             "http://localhost/oauth/token",
             "MNO",
             "UVW",
         )
         self.oauthservice2 = OAuth2Service(
-            "BetonService", ["fileStorage"], FileTransferMode.active, FileTransferArchive.none,
+            "BetonService", [
+                "fileStorage"], FileTransferMode.active, FileTransferArchive.none,
             "http://owncloud/oauth/authorize",
             "http://owncloud/oauth/token",
             "UVP",
@@ -129,7 +132,8 @@ class TestToken(unittest.TestCase):
         }
         dump = json.dumps(self.oauthtoken1)
         # self.assertEqual(dump, json.dumps(expected))
-        self.assertEqual(OAuth2Token.from_json(dump), self.oauthtoken1, msg=dump)
+        self.assertEqual(OAuth2Token.from_json(
+            dump), self.oauthtoken1, msg=dump)
 
     def test_logintoken(self):
         user1 = User("Max Mustermann")
@@ -138,7 +142,8 @@ class TestToken(unittest.TestCase):
         service1 = LoginService("MusterService", ["fileStorage"])
         service2 = LoginService("BetonService", ["fileStorage"], userId=False)
         service3 = LoginService("FahrService", ["fileStorage"], password=False)
-        service4 = LoginService("TaxiService", ["fileStorage"], userId=False, password=False)
+        service4 = LoginService(
+            "TaxiService", ["fileStorage"], userId=False, password=False)
 
         with self.assertRaises(ValueError):
             LoginToken(None, service1, "")
@@ -171,6 +176,17 @@ class TestToken(unittest.TestCase):
         LoginToken(None, service4, "")
         LoginToken(user1, service4, "")
         LoginToken(None, service4, "DEF")
-        
+
         Token(user1, service1, "DEF")
         Token(user1, service3, "DEF")
+
+    def test_token_service_init(self):
+        user1 = User("Max Mustermann")
+        service1 = BaseService("MusterService", ["fileStorage"])
+        service2 = LoginService(
+            "BetonService", ["fileStorage"], userId=True, password=False)
+
+        LoginToken(user1, service2, "")
+
+        with self.assertRaises(ValueError):
+            Token(user1, service1, "")

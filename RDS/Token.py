@@ -16,8 +16,10 @@ def initToken(obj: Union[str, dict]):
     load = try_function_on_dict(
         [
             OAuth2Token.from_json,
-            Token.from_json,
+            LoginToken.from_json,
             OAuth2Token.from_dict,
+            LoginToken.from_dict,
+            Token.from_json,
             Token.from_dict,
         ]
     )
@@ -34,12 +36,13 @@ class Token:
     _access_token = None
 
     def __init__(self, user: User, service, access_token: str):
-        self.check_string(access_token, "access_token")
-
-        from RDS import BaseService
+        from RDS import BaseService, LoginService
 
         if not isinstance(service, BaseService):
             raise ValueError(f"service parameter needs to be of type Service.")
+
+        if not isinstance(service, LoginService):
+            self.check_string(access_token, "access_token")
 
         self._service = service
         self._user = user

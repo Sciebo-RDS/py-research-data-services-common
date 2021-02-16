@@ -29,6 +29,8 @@ def initService(obj: Union[str, dict]):
             OAuth2Service.from_dict,
             LoginService.from_json,
             LoginService.from_dict,
+            BaseService.from_json,
+            BaseService.from_dict
         ]
     )
     return load(obj)

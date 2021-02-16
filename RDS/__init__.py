@@ -13,7 +13,7 @@ def int_or_str(value):
         return value
 
 
-__version__ = "0.33"
+__version__ = "0.34"
 VERSION = tuple(map(int_or_str, __version__.split(".")))
 
 __all__ = [
@@ -29,4 +29,3 @@ __all__ = [
     "FileTransferMode",
     "FileTransferArchive"
 ]
-
