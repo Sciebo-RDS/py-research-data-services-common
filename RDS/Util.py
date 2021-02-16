@@ -15,7 +15,9 @@ def parseUserId(obj: str):
     # TODO: add regex here (\S+):\/\/(\S+?):(\S+)
     service, user = obj.split("://")
     userId, password = user.split(":")
-    service = service.replace("port-", "")
+
+    if not "port-" in service:
+        service = "port-{}".format(service)
 
     if password == "None":
         password = None
@@ -87,6 +89,9 @@ def loadToken(userId: str, service: Union[str, BaseService]) -> str:
         servicename = service.servicename
     except:
         servicename = service
+
+    if not servicename.startswith("port-"):
+        servicename = "port-{}".format(servicename)
 
     result = requests.get(
         f"{tokenStorageURL}/user/{userId}/service/{servicename}",
