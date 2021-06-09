@@ -114,7 +114,7 @@ class TestService(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             LoginService("Service")
-        
+
         LoginService("Service", ["fileStorage"])
         LoginService("Service", ["fileStorage"], FileTransferMode.active)
         LoginService("Service", ["fileStorage"], FileTransferMode.active,
@@ -195,7 +195,7 @@ class TestService(unittest.TestCase):
                 "MusterService",
                 ["fileStorage"],
                 FileTransferMode.active,
-                FileTransferArchive.none, 
+                FileTransferArchive.none,
                 "localhost",
                 "http://localhost:5001/oauth/refresh",
                 "ABC",
@@ -341,3 +341,46 @@ class TestService(unittest.TestCase):
             svc1.refresh(Token(User("Max Mustermann"), svc1, "ABC"))
             svc1.refresh("asd")
             svc1.refresh(123)
+
+    def test_service_give_description(self):
+        text = "This is a test description."
+
+        svc1 = BaseService(
+            "MusterService",
+            ["fileStorage"],
+            FileTransferMode.active,
+            FileTransferArchive.none,
+            text
+        )
+
+        self.assertEqual(svc1.description, text)
+        self.assertNotEqual(svc1.description, "This is not valid.")
+        self.assertEqual(svc1.to_dict().get("description"), text)
+        self.assertEqual(BaseService.from_dict(
+            svc1.to_dict()).description, text)
+        self.assertEqual(BaseService.from_json(
+            svc1.to_json()).description, text)
+
+        svc1 = OAuth2Service(
+            "MusterService",
+            ["fileStorage"],
+            FileTransferMode.active,
+            FileTransferArchive.none,
+            "http://localhost:5001",
+            "http://localhost:5001/oauth/refresh",
+            "ABC",
+            "XYZ",
+            text
+        )
+
+        self.assertEqual(svc1.description, text)
+
+        svc1 = LoginService(
+            "Service", ["fileStorage"],
+            FileTransferMode.active,
+            FileTransferArchive.none,
+            False, False,
+            text
+        )
+
+        self.assertEqual(svc1.description, text)

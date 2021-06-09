@@ -45,8 +45,16 @@ class BaseService:
     _implements = None
     _fileTransferMode = None
     _fileTransferArchive = None
+    _description = None
 
-    def __init__(self, servicename: str, implements: list = None, fileTransferMode: FileTransferMode = FileTransferMode.active, fileTransferArchive: FileTransferArchive = FileTransferArchive.none):
+    def __init__(
+        self,
+        servicename: str,
+        implements: list = None,
+        fileTransferMode: FileTransferMode = FileTransferMode.active,
+        fileTransferArchive: FileTransferArchive = FileTransferArchive.none,
+        description: str = ""
+    ):
         """Initialize Service without any authentication.
 
         Args:
@@ -54,10 +62,12 @@ class BaseService:
             implements (list, optional): Specified the implemented port endpoints. Defaults to empty list.
             fileTransferMode (int, optional): Set the mode for transfering files. Defaults to 0=active. Alternative is 1=passive.
             fileTransferArchive (str, optional): Set the archive, which is needed for transfering files. Defaults to "". Other value is "zip"
+            description (str, optional): Set a short description for this service. Defaults to "".
         """
         self.check_string(servicename, "servicename")
 
         self._servicename = servicename.lower()
+        self._description = description
 
         self._implements = implements
         if implements is None:
@@ -67,7 +77,9 @@ class BaseService:
 
         if len(self._implements) == 0 or len(self._implements) > 2:
             raise ValueError(
-                "implements is empty or over 2 elements. Value: {}, Only valid: {}".format(len(self._implements), valid_implements))
+                "implements is empty or over 2 elements. Value: {}, Only valid: {}".format(
+                    len(self._implements), valid_implements)
+            )
 
         for impl in self._implements:
             if impl not in valid_implements:
@@ -88,6 +100,10 @@ class BaseService:
     @property
     def fileTransferArchive(self):
         return self._fileTransferArchive
+
+    @property
+    def description(self):
+        return self._description
 
     @property
     def implements(self):
@@ -129,7 +145,8 @@ class BaseService:
             "servicename": self._servicename,
             "implements": self._implements,
             "fileTransferMode": self.fileTransferMode.value,
-            "fileTransferArchive": self.fileTransferArchive.value
+            "fileTransferArchive": self.fileTransferArchive.value,
+            "description": self._description
         }
 
         return data
@@ -149,7 +166,13 @@ class BaseService:
         if "type" in data and str(data["type"]).endswith("Service") and "data" in data:
             data = data["data"]
 
-            return BaseService(data["servicename"], data.get("implements"), FileTransferMode(data.get("fileTransferMode", 0)), FileTransferArchive(data.get("fileTransferArchive", 0)))
+            return BaseService(
+                data["servicename"],
+                data.get("implements"),
+                FileTransferMode(data.get("fileTransferMode", 0)),
+                FileTransferArchive(data.get("fileTransferArchive", 0)),
+                data.get("description")
+            )
 
         raise ValueError("not a valid service json string.")
 
@@ -164,9 +187,10 @@ class BaseService:
                 serviceDict["servicename"],
                 serviceDict.get("implements", ["metadata"]),
                 FileTransferMode(serviceDict.get("fileTransferMode", 0)),
-                FileTransferArchive(serviceDict.get("fileTransferArchive", 0))
+                FileTransferArchive(serviceDict.get(
+                    "fileTransferArchive", 0)),
+                serviceDict.get("description")
             )
-
         except:
             raise ValueError("not a valid service dict")
 
@@ -182,7 +206,8 @@ class LoginService(BaseService):
         fileTransferMode: FileTransferMode = FileTransferMode.active,
         fileTransferArchive: FileTransferArchive = FileTransferArchive.none,
         userId: bool = True,
-        password: bool = True
+        password: bool = True,
+        description: str = ""
     ):
         """Initialize Service with username:password authentication.
 
@@ -193,8 +218,15 @@ class LoginService(BaseService):
             fileTransferArchive (str, optional): Set the archive, which is needed for transfering files. Defaults to "". Other value is "zip"
             userId (bool, optional): Set True, if username is needed to work. Defaults to True.
             password (bool, optional): Set True, if password is needed to work. Defaults to True.
+            description (str, optional): Set a short description for this service. Defaults to "".
         """
-        super().__init__(servicename, implements, fileTransferMode, fileTransferArchive)
+        super().__init__(
+            servicename,
+            implements,
+            fileTransferMode,
+            fileTransferArchive,
+            description
+        )
 
         self._userId = userId
         self._password = password
@@ -287,7 +319,8 @@ class LoginService(BaseService):
             service.fileTransferMode,
             service.fileTransferArchive,
             userId,
-            password
+            password,
+            service.description
         )
 
 
@@ -311,9 +344,25 @@ class OAuth2Service(BaseService):
         authorize_url: str = "",
         refresh_url: str = "",
         client_id: str = "",
-        client_secret: str = ""
+        client_secret: str = "",
+        description: str = ""
     ):
-        super().__init__(servicename, implements, fileTransferMode, fileTransferArchive)
+        """Initialize a service for oauth2.
+
+        Args:
+            servicename (str): The name of the service, which will be registered. Must be unique.
+            implements (list, optional): Specified the implemented port endpoints. Defaults to empty list.
+            fileTransferMode (int, optional): Set the mode for transfering files. Defaults to 0=active. Alternative is 1=passive.
+            fileTransferArchive (str, optional): Set the archive, which is needed for transfering files. Defaults to "". Other value is "zip"
+            authorize_url (str, optional): The authorize url from oauth2 workflow. Defaults to "".
+            refresh_url (str, optional): The refresh url from oauth2 workflow. Defaults to "".
+            client_id (str, optional): The client id from oauth2 workflow. Defaults to "".
+            client_secret (str, optional): The client secret from oauth2 workflow. Defaults to "".
+            description (str, optional): Set a short description for this service. Defaults to "".
+        """
+        super().__init__(
+            servicename, implements, fileTransferMode, fileTransferArchive, description
+        )
 
         self.check_string(authorize_url, "authorize_url")
         self.check_string(refresh_url, "refresh_url")
@@ -465,11 +514,14 @@ class OAuth2Service(BaseService):
         """
         return cls(
             service.servicename,
-            service.implements, service.fileTransferMode, service.fileTransferArchive,
+            service.implements,
+            service.fileTransferMode,
+            service.fileTransferArchive,
             authorize_url,
             refresh_url,
             client_id,
             client_secret,
+            service.description
         )
 
     def __eq__(self, obj):
