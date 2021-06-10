@@ -6,8 +6,12 @@ from RDS import LoginService, OAuth2Service, User, Token, OAuth2Token, Util
 
 class Test_Util(unittest.TestCase):
     def setUp(self):
-        self.service1 = LoginService("MusterService", ["fileStorage"])
-        self.service2 = LoginService("BetonService", ["fileStorage"])
+        self.service1 = LoginService(
+            servicename="MusterService",
+            implements=["fileStorage"])
+        self.service2 = LoginService(
+            servicename="BetonService",
+            implements=["fileStorage"])
         self.oauthservice1 = OAuth2Service.from_service(
             self.service1,
             "http://localhost:5000/oauth/authorize",
@@ -125,7 +129,8 @@ class Test_Util(unittest.TestCase):
     def test_init_objects(self):
         self.assertEqual(Util.getServiceObject(
             json.dumps(self.oauthservice1)), self.oauthservice1)
-        svc1 = LoginService("MusterService", ["fileStorage"])
+        svc1 = LoginService(servicename="MusterService",
+                            implements=["fileStorage"])
         self.assertEqual(Util.getServiceObject(json.dumps(svc1)), svc1)
         self.assertNotEqual(Util.getServiceObject(
             json.dumps(svc1)).__class__, self.oauthservice1.__class__)
@@ -164,7 +169,8 @@ class Test_Util(unittest.TestCase):
 
     def test_parseToken(self):
         user1 = User("MaxMustermann")
-        service1 = LoginService("MusterService", ["fileStorage"])
+        service1 = LoginService(
+            servicename="MusterService", implements=["fileStorage"])
         token1 = Token(user1, service1, "ABC")
 
         serviceport = "{}".format(token1.service.servicename)

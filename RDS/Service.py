@@ -7,6 +7,9 @@ import json
 from datetime import datetime, timedelta
 from typing import Union
 import logging
+import mimetypes
+import base64
+from io import IOBase
 
 logger = logging.getLogger()
 
@@ -46,6 +49,10 @@ class BaseService:
     _fileTransferMode = None
     _fileTransferArchive = None
     _description = None
+    _icon = None
+    _infoUrl = None
+    _helpUrl = None
+    _displayName = None
 
     def __init__(
         self,
@@ -53,7 +60,11 @@ class BaseService:
         implements: list = None,
         fileTransferMode: FileTransferMode = FileTransferMode.active,
         fileTransferArchive: FileTransferArchive = FileTransferArchive.none,
-        description: str = ""
+        description: dict = None,
+        icon: IOBase = None,
+        infoUrl: str = "",
+        helpUrl: str = "",
+        displayName: str = None
     ):
         """Initialize Service without any authentication.
 
@@ -62,12 +73,31 @@ class BaseService:
             implements (list, optional): Specified the implemented port endpoints. Defaults to empty list.
             fileTransferMode (int, optional): Set the mode for transfering files. Defaults to 0=active. Alternative is 1=passive.
             fileTransferArchive (str, optional): Set the archive, which is needed for transfering files. Defaults to "". Other value is "zip"
-            description (str, optional): Set a short description for this service. Defaults to "".
+            description (dict, optional): Set a short description for this service with corresponding language. Defaults to {"en":""}.
+            icon: (IOBase, optional): Takes a filelike object, so the mimetype and base64 can be calculated for later usage. Defaults to None.
+            infoUrl: (str, optional): Set the infoUrl for this service, so the user can be redirected to it to find more information about the service. Defaults to "".
+            helpUrl: (str, optional): Set the helpUrl for this service, so the user can be redirected to a helpdesk page about this service. Defaults to "".
+            displayName: (str, optional): Set the displayName for this service, which can be different as the servicename. Servicename will be used for identifiers. Defaults to "".
         """
         self.check_string(servicename, "servicename")
 
         self._servicename = servicename.lower()
-        self._description = description
+
+        if description is None:
+            self._description = {"en": ""}
+        else:
+            self._description = description
+
+        self._infoUrl = infoUrl
+        self._helpUrl = helpUrl
+        self._displayName = displayName
+
+        if icon is not None:
+            filecontent = icon.read()
+            self._icon = "data:{};base64,{}".format(
+                mimetypes.readfp(filecontent),
+                base64.b64encode(filecontent)
+            )
 
         self._implements = implements
         if implements is None:
@@ -104,6 +134,22 @@ class BaseService:
     @property
     def description(self):
         return self._description
+
+    @property
+    def icon(self):
+        return self._icon
+
+    @property
+    def infoUrl(self):
+        return self._infoUrl
+
+    @property
+    def helpUrl(self):
+        return self._helpUrl
+
+    @property
+    def displayName(self):
+        return self._displayName
 
     @property
     def implements(self):
@@ -146,7 +192,11 @@ class BaseService:
             "implements": self._implements,
             "fileTransferMode": self.fileTransferMode.value,
             "fileTransferArchive": self.fileTransferArchive.value,
-            "description": self._description
+            "description": self._description,
+            "icon": self._icon,
+            "infoUrl": self._infoUrl,
+            "helpUrl": self._helpUrl,
+            "displayName": self._displayName
         }
 
         return data
@@ -171,7 +221,11 @@ class BaseService:
                 data.get("implements"),
                 FileTransferMode(data.get("fileTransferMode", 0)),
                 FileTransferArchive(data.get("fileTransferArchive", 0)),
-                data.get("description")
+                data.get("description"),
+                data.get("icon"),
+                data.get("infoUrl"),
+                data.get("helpUrl"),
+                data.get("displayName")
             )
 
         raise ValueError("not a valid service json string.")
@@ -189,7 +243,11 @@ class BaseService:
                 FileTransferMode(serviceDict.get("fileTransferMode", 0)),
                 FileTransferArchive(serviceDict.get(
                     "fileTransferArchive", 0)),
-                serviceDict.get("description")
+                serviceDict.get("description"),
+                serviceDict.get("icon"),
+                serviceDict.get("infoUrl"),
+                serviceDict.get("helpUrl"),
+                serviceDict.get("displayName")
             )
         except:
             raise ValueError("not a valid service dict")
@@ -201,32 +259,17 @@ class LoginService(BaseService):
 
     def __init__(
         self,
-        servicename: str,
-        implements: list = None,
-        fileTransferMode: FileTransferMode = FileTransferMode.active,
-        fileTransferArchive: FileTransferArchive = FileTransferArchive.none,
         userId: bool = True,
         password: bool = True,
-        description: str = ""
+        *args, **kwargs
     ):
         """Initialize Service with username:password authentication.
 
         Args:
-            servicename (str): The name of the service, which will be registered. Must be unique.
-            implements (list, optional): Specified the implemented port endpoints. Defaults to empty list.
-            fileTransferMode (int, optional): Set the mode for transfering files. Defaults to 0=active. Alternative is 1=passive.
-            fileTransferArchive (str, optional): Set the archive, which is needed for transfering files. Defaults to "". Other value is "zip"
             userId (bool, optional): Set True, if username is needed to work. Defaults to True.
             password (bool, optional): Set True, if password is needed to work. Defaults to True.
-            description (str, optional): Set a short description for this service. Defaults to "".
         """
-        super().__init__(
-            servicename,
-            implements,
-            fileTransferMode,
-            fileTransferArchive,
-            description
-        )
+        super().__init__(*args, **kwargs)
 
         self._userId = userId
         self._password = password
@@ -314,13 +357,17 @@ class LoginService(BaseService):
         password: bool
     ):
         return cls(
+            userId,
+            password,
             service.servicename,
             service.implements,
             service.fileTransferMode,
             service.fileTransferArchive,
-            userId,
-            password,
-            service.description
+            service.description,
+            service.icon,
+            service.infoUrl,
+            service.helpUrl,
+            service.displayName,
         )
 
 
@@ -337,32 +384,21 @@ class OAuth2Service(BaseService):
 
     def __init__(
         self,
-        servicename: str = "",
-        implements: list = None,
-        fileTransferMode: FileTransferMode = FileTransferMode.active,
-        fileTransferArchive: FileTransferArchive = FileTransferArchive.none,
         authorize_url: str = "",
         refresh_url: str = "",
         client_id: str = "",
         client_secret: str = "",
-        description: str = ""
+        *args, **kwargs
     ):
         """Initialize a service for oauth2.
 
         Args:
-            servicename (str): The name of the service, which will be registered. Must be unique.
-            implements (list, optional): Specified the implemented port endpoints. Defaults to empty list.
-            fileTransferMode (int, optional): Set the mode for transfering files. Defaults to 0=active. Alternative is 1=passive.
-            fileTransferArchive (str, optional): Set the archive, which is needed for transfering files. Defaults to "". Other value is "zip"
             authorize_url (str, optional): The authorize url from oauth2 workflow. Defaults to "".
             refresh_url (str, optional): The refresh url from oauth2 workflow. Defaults to "".
             client_id (str, optional): The client id from oauth2 workflow. Defaults to "".
             client_secret (str, optional): The client secret from oauth2 workflow. Defaults to "".
-            description (str, optional): Set a short description for this service. Defaults to "".
         """
-        super().__init__(
-            servicename, implements, fileTransferMode, fileTransferArchive, description
-        )
+        super().__init__(*args, **kwargs)
 
         self.check_string(authorize_url, "authorize_url")
         self.check_string(refresh_url, "refresh_url")
@@ -513,15 +549,19 @@ class OAuth2Service(BaseService):
         Converts the given Service to an oauth2service.
         """
         return cls(
-            service.servicename,
-            service.implements,
-            service.fileTransferMode,
-            service.fileTransferArchive,
             authorize_url,
             refresh_url,
             client_id,
             client_secret,
-            service.description
+            service.servicename,
+            service.implements,
+            service.fileTransferMode,
+            service.fileTransferArchive,
+            service.description,
+            service.icon,
+            service.infoUrl,
+            service.helpUrl,
+            service.displayName,
         )
 
     def __eq__(self, obj):

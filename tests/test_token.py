@@ -9,27 +9,29 @@ class TestToken(unittest.TestCase):
         self.user1 = User("Max Mustermann")
         self.user2 = User("12345")
 
-        self.service1 = LoginService("MusterService", ["fileStorage"])
-        self.service2 = LoginService("BetonService", ["fileStorage"])
+        self.service1 = LoginService(
+            servicename="MusterService", implements=["fileStorage"])
+        self.service2 = LoginService(
+            servicename="BetonService", implements=["fileStorage"])
 
         self.token1 = Token(self.user1, self.service1, "ABC")
         self.token2 = Token(self.user1, self.service2, "DEF")
 
         self.oauthservice1 = OAuth2Service(
-            "MusterService", [
-                "fileStorage"], FileTransferMode.active, FileTransferArchive.none,
-            "http://localhost/oauth/authorize",
-            "http://localhost/oauth/token",
-            "MNO",
-            "UVW",
+            servicename="MusterService", implements=[
+                "fileStorage"], fileTransferMode=FileTransferMode.active, fileTransferArchive=FileTransferArchive.none,
+            authorize_url="http://localhost/oauth/authorize",
+            refresh_url="http://localhost/oauth/token",
+            client_id="MNO",
+            client_secret="UVW",
         )
         self.oauthservice2 = OAuth2Service(
-            "BetonService", [
-                "fileStorage"], FileTransferMode.active, FileTransferArchive.none,
-            "http://owncloud/oauth/authorize",
-            "http://owncloud/oauth/token",
-            "UVP",
-            "OMN",
+            servicename="BetonService", implements=[
+                "fileStorage"], fileTransferMode=FileTransferMode.active, fileTransferArchive=FileTransferArchive.none,
+            authorize_url="http://owncloud/oauth/authorize",
+            refresh_url="http://owncloud/oauth/token",
+            client_id="UVP",
+            client_secret="OMN",
         )
 
         self.oauthtoken1 = OAuth2Token(
@@ -139,11 +141,14 @@ class TestToken(unittest.TestCase):
         user1 = User("Max Mustermann")
         user2 = User("12345")
 
-        service1 = LoginService("MusterService", ["fileStorage"])
-        service2 = LoginService("BetonService", ["fileStorage"], userId=False)
-        service3 = LoginService("FahrService", ["fileStorage"], password=False)
+        service1 = LoginService(
+            servicename="MusterService", implements=["fileStorage"])
+        service2 = LoginService(servicename="BetonService", implements=[
+                                "fileStorage"], userId=False)
+        service3 = LoginService(servicename="FahrService", implements=[
+                                "fileStorage"], password=False)
         service4 = LoginService(
-            "TaxiService", ["fileStorage"], userId=False, password=False)
+            servicename="TaxiService", implements=["fileStorage"], userId=False, password=False)
 
         with self.assertRaises(ValueError):
             LoginToken(None, service1, "")
@@ -182,9 +187,10 @@ class TestToken(unittest.TestCase):
 
     def test_token_service_init(self):
         user1 = User("Max Mustermann")
-        service1 = BaseService("MusterService", ["fileStorage"])
+        service1 = BaseService(servicename="MusterService",
+                               implements=["fileStorage"])
         service2 = LoginService(
-            "BetonService", ["fileStorage"], userId=True, password=False)
+            servicename="BetonService", implements=["fileStorage"], userId=True, password=False)
 
         LoginToken(user1, service2, "")
 
