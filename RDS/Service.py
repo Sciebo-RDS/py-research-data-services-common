@@ -100,7 +100,10 @@ class BaseService:
         else:
             self._helpUrl = ""
 
-        self._displayName = displayName
+        if displayName is not None:
+            self._displayName = displayName
+        else:
+            self._displayName = ""
 
         if icon is not None and icon != "":
             if isinstance(icon, (str)) and str(icon).startswith("data:"):
@@ -270,7 +273,7 @@ class BaseService:
         except Exception as e:
             logger.error(e, exc_info=True)
             raise ValueError("not a valid service dict for class {}".format(
-                cls.__class__.__name__))
+                cls.__class__))
 
 
 class LoginService(BaseService):
