@@ -577,6 +577,26 @@ class TestService(unittest.TestCase):
         )
         self.assertEqual(infoUrl, parse.unquote_plus(svc1.infoUrl))
 
+        svc1 = BaseService(
+            servicename="owncloud",
+            implements=["fileStorage"],
+            fileTransferMode=FileTransferMode.active,
+            fileTransferArchive=FileTransferArchive.none,
+            infoUrl=None
+        )
+
+        self.assertEqual(svc1.infoUrl, "")
+
+        svc1 = BaseService(
+            servicename="owncloud",
+            implements=["fileStorage"],
+            fileTransferMode=FileTransferMode.active,
+            fileTransferArchive=FileTransferArchive.none,
+            infoUrl=""
+        )
+
+        self.assertEqual(svc1.infoUrl, "")
+
         svc1 = LoginService(
             servicename="owncloud",
             implements=["fileStorage"],
@@ -587,6 +607,16 @@ class TestService(unittest.TestCase):
             infoUrl=infoUrl
         )
         self.assertEqual(infoUrl, parse.unquote_plus(svc1.infoUrl))
+
+        svc1 = LoginService(
+            servicename="owncloud",
+            implements=["fileStorage"],
+            fileTransferMode=FileTransferMode.active,
+            fileTransferArchive=FileTransferArchive.none,
+            userId=False,
+            password=False
+        )
+        self.assertEqual(svc1.infoUrl, "")
 
         svc1 = OAuth2Service(
             servicename="MusterService",

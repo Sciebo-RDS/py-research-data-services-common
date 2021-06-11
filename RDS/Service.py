@@ -90,8 +90,16 @@ class BaseService:
         else:
             self._description = description
 
-        self._infoUrl = parse.quote_plus(infoUrl)
-        self._helpUrl = parse.quote_plus(helpUrl)
+        if infoUrl is not None:
+            self._infoUrl = parse.quote_plus(infoUrl)
+        else:
+            self._infoUrl = ""
+
+        if helpUrl is not None:
+            self._helpUrl = parse.quote_plus(helpUrl)
+        else:
+            self._helpUrl = ""
+
         self._displayName = displayName
 
         if icon is not None and icon != "":
