@@ -11,6 +11,7 @@ import mimetypes
 import base64
 import os.path
 from io import IOBase
+from urllib import parse
 
 logger = logging.getLogger()
 
@@ -89,16 +90,18 @@ class BaseService:
         else:
             self._description = description
 
-        self._infoUrl = infoUrl
-        self._helpUrl = helpUrl
+        self._infoUrl = parse.quote_plus(infoUrl)
+        self._helpUrl = parse.quote_plus(helpUrl)
         self._displayName = displayName
 
         if icon is not None and icon != "":
-            if os.path.isfile(icon):
+            if isinstance(icon, (str)) and str(icon).startswith("data:"):
+                self._icon = icon
+            elif os.path.isfile(icon):
                 mime = mimetypes.guess_type(icon)[0]
 
                 with open(icon, "rb") as f:
-                    b64 = base64.b64encode(f.read())
+                    b64 = base64.b64encode(f.read()).decode("utf-8")
                     self._icon = f"data:{mime};base64,{b64}"
             else:
                 raise FileNotFoundError
@@ -256,8 +259,10 @@ class BaseService:
                 helpUrl=serviceDict.get("helpUrl"),
                 displayName=serviceDict.get("displayName")
             )
-        except:
-            raise ValueError("not a valid service dict")
+        except Exception as e:
+            logger.error(e, exc_info=True)
+            raise ValueError("not a valid service dict for class {}".format(
+                cls.__class__.__name__))
 
 
 class LoginService(BaseService):

@@ -1,6 +1,7 @@
 import unittest
 from RDS import BaseService, LoginService, OAuth2Service, FileTransferMode, FileTransferArchive
 import base64
+from urllib import parse
 
 
 class TestService(unittest.TestCase):
@@ -514,6 +515,21 @@ class TestService(unittest.TestCase):
 
         self.assertEqual(svc1.description, text)
 
+    def test_icon_post(self):
+        svc1 = BaseService(
+            servicename="owncloud",
+            implements=["fileStorage"],
+            fileTransferMode=FileTransferMode.active,
+            fileTransferArchive=FileTransferArchive.none,
+            icon="./tests/sciebo.png"
+        )
+
+        svc2 = BaseService.from_json(svc1.to_json())
+        self.assertEqual(svc1.icon, svc2.icon)
+
+        svc2 = BaseService.from_dict(svc1.to_dict())
+        self.assertEqual(svc1.icon, svc2.icon)
+
     def test_icon(self):
         # if no icon was given, then it is okay.
         BaseService(
@@ -536,7 +552,7 @@ class TestService(unittest.TestCase):
         filename = "./tests/sciebo.png"
 
         with open(filename, 'rb') as f:
-            b64 = base64.b64encode(f.read())
+            b64 = base64.b64encode(f.read()).decode("utf-8")
 
             svc1 = BaseService(
                 servicename="owncloud",
@@ -546,6 +562,8 @@ class TestService(unittest.TestCase):
                 icon=filename
             )
             self.assertEqual(f"data:image/png;base64,{b64}", svc1.icon)
+            self.assertFalse(str(svc1.icon).find("b'") >= 0)
+            self.assertFalse(str(svc1.icon).find("'") >= 0)
 
     def test_url(self):
         infoUrl = "http://localhost"
@@ -557,7 +575,7 @@ class TestService(unittest.TestCase):
             fileTransferArchive=FileTransferArchive.none,
             infoUrl=infoUrl
         )
-        self.assertEqual(infoUrl, svc1.infoUrl)
+        self.assertEqual(infoUrl, parse.unquote_plus(svc1.infoUrl))
 
         svc1 = LoginService(
             servicename="owncloud",
@@ -568,7 +586,7 @@ class TestService(unittest.TestCase):
             password=False,
             infoUrl=infoUrl
         )
-        self.assertEqual(infoUrl, svc1.infoUrl)
+        self.assertEqual(infoUrl, parse.unquote_plus(svc1.infoUrl))
 
         svc1 = OAuth2Service(
             servicename="MusterService",
@@ -581,7 +599,7 @@ class TestService(unittest.TestCase):
             client_secret="XYZ",
             infoUrl=infoUrl
         )
-        self.assertEqual(infoUrl, svc1.infoUrl)
+        self.assertEqual(infoUrl, parse.unquote_plus(svc1.infoUrl))
 
     def test_displayname(self):
         displayname = "ownCloud"
