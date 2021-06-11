@@ -1,5 +1,6 @@
 import unittest
 from RDS import BaseService, LoginService, OAuth2Service, FileTransferMode, FileTransferArchive
+import base64
 
 
 class TestService(unittest.TestCase):
@@ -34,12 +35,12 @@ class TestService(unittest.TestCase):
         )
 
     def test_compare_service(self):
-        s1 = BaseService("MusterService", ["fileStorage"],
-                         FileTransferMode.active, FileTransferArchive.none)
-        s2 = BaseService("MusterService", ["metadata"],
-                         FileTransferMode.passive, FileTransferArchive.zip)
-        s3 = BaseService("FahrService", ["fileStorage"],
-                         FileTransferMode.active, FileTransferArchive.none)
+        s1 = BaseService(servicename="MusterService", implements=["fileStorage"],
+                         fileTransferMode=FileTransferMode.active, fileTransferArchive=FileTransferArchive.none)
+        s2 = BaseService(servicename="MusterService", implements=["metadata"],
+                         fileTransferMode=FileTransferMode.passive, fileTransferArchive=FileTransferArchive.zip)
+        s3 = BaseService(servicename="FahrService", implements=["fileStorage"],
+                         fileTransferMode=FileTransferMode.active, fileTransferArchive=FileTransferArchive.none)
 
         os1 = OAuth2Service.from_service(
             s1,
@@ -514,9 +515,27 @@ class TestService(unittest.TestCase):
         self.assertEqual(svc1.description, text)
 
     def test_icon(self):
-        import base64
+        # if no icon was given, then it is okay.
+        BaseService(
+            servicename="owncloud",
+            implements=["fileStorage"],
+            fileTransferMode=FileTransferMode.active,
+            fileTransferArchive=FileTransferArchive.none
+        )
 
-        with open("tests/sciebo.png") as f:
+        # if a filepath was given, then it have to be exist.
+        with self.assertRaises(FileNotFoundError):
+            BaseService(
+                servicename="owncloud",
+                implements=["fileStorage"],
+                fileTransferMode=FileTransferMode.active,
+                fileTransferArchive=FileTransferArchive.none,
+                icon="sciebo.png"
+            )
+
+        filename = "./tests/sciebo.png"
+
+        with open(filename, 'rb') as f:
             b64 = base64.b64encode(f.read())
 
             svc1 = BaseService(
@@ -524,7 +543,7 @@ class TestService(unittest.TestCase):
                 implements=["fileStorage"],
                 fileTransferMode=FileTransferMode.active,
                 fileTransferArchive=FileTransferArchive.none,
-                icon=f
+                icon=filename
             )
             self.assertEqual(f"data:image/png;base64,{b64}", svc1.icon)
 

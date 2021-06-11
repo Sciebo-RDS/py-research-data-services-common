@@ -9,6 +9,7 @@ from typing import Union
 import logging
 import mimetypes
 import base64
+import os.path
 from io import IOBase
 
 logger = logging.getLogger()
@@ -61,7 +62,7 @@ class BaseService:
         fileTransferMode: FileTransferMode = FileTransferMode.active,
         fileTransferArchive: FileTransferArchive = FileTransferArchive.none,
         description: dict = None,
-        icon: IOBase = None,
+        icon: str = "",
         infoUrl: str = "",
         helpUrl: str = "",
         displayName: str = None
@@ -74,7 +75,7 @@ class BaseService:
             fileTransferMode (int, optional): Set the mode for transfering files. Defaults to 0=active. Alternative is 1=passive.
             fileTransferArchive (str, optional): Set the archive, which is needed for transfering files. Defaults to "". Other value is "zip"
             description (dict, optional): Set a short description for this service with corresponding language. Defaults to {"en":""}.
-            icon: (IOBase, optional): Takes a filelike object, so the mimetype and base64 can be calculated for later usage. Defaults to None.
+            icon: (str, optional): Takes a filepath, so the mimetype and base64 can be calculated for later usage. Defaults to "".
             infoUrl: (str, optional): Set the infoUrl for this service, so the user can be redirected to it to find more information about the service. Defaults to "".
             helpUrl: (str, optional): Set the helpUrl for this service, so the user can be redirected to a helpdesk page about this service. Defaults to "".
             displayName: (str, optional): Set the displayName for this service, which can be different as the servicename. Servicename will be used for identifiers. Defaults to "".
@@ -92,12 +93,15 @@ class BaseService:
         self._helpUrl = helpUrl
         self._displayName = displayName
 
-        if icon is not None:
-            filecontent = icon.read()
-            self._icon = "data:{};base64,{}".format(
-                mimetypes.readfp(filecontent),
-                base64.b64encode(filecontent)
-            )
+        if icon is not None and icon != "":
+            if os.path.isfile(icon):
+                mime = mimetypes.guess_type(icon)[0]
+
+                with open(icon, "rb") as f:
+                    b64 = base64.b64encode(f.read())
+                    self._icon = f"data:{mime};base64,{b64}"
+            else:
+                raise FileNotFoundError
 
         self._implements = implements
         if implements is None:
@@ -217,15 +221,17 @@ class BaseService:
             data = data["data"]
 
             return BaseService(
-                data["servicename"],
-                data.get("implements"),
-                FileTransferMode(data.get("fileTransferMode", 0)),
-                FileTransferArchive(data.get("fileTransferArchive", 0)),
-                data.get("description"),
-                data.get("icon"),
-                data.get("infoUrl"),
-                data.get("helpUrl"),
-                data.get("displayName")
+                servicename=data["servicename"],
+                implements=data.get("implements"),
+                fileTransferMode=FileTransferMode(
+                    data.get("fileTransferMode", 0)),
+                fileTransferArchive=FileTransferArchive(
+                    data.get("fileTransferArchive", 0)),
+                description=data.get("description"),
+                icon=data.get("icon"),
+                infoUrl=data.get("infoUrl"),
+                helpUrl=data.get("helpUrl"),
+                displayName=data.get("displayName")
             )
 
         raise ValueError("not a valid service json string.")
@@ -238,16 +244,17 @@ class BaseService:
 
         try:
             return BaseService(
-                serviceDict["servicename"],
-                serviceDict.get("implements", ["metadata"]),
-                FileTransferMode(serviceDict.get("fileTransferMode", 0)),
-                FileTransferArchive(serviceDict.get(
-                    "fileTransferArchive", 0)),
-                serviceDict.get("description"),
-                serviceDict.get("icon"),
-                serviceDict.get("infoUrl"),
-                serviceDict.get("helpUrl"),
-                serviceDict.get("displayName")
+                servicename=serviceDict["servicename"],
+                implements=serviceDict.get("implements", ["metadata"]),
+                fileTransferMode=FileTransferMode(
+                    serviceDict.get("fileTransferMode", 0)),
+                fileTransferArchive=FileTransferArchive(
+                    serviceDict.get("fileTransferArchive", 0)),
+                description=serviceDict.get("description"),
+                icon=serviceDict.get("icon"),
+                infoUrl=serviceDict.get("infoUrl"),
+                helpUrl=serviceDict.get("helpUrl"),
+                displayName=serviceDict.get("displayName")
             )
         except:
             raise ValueError("not a valid service dict")
@@ -357,17 +364,17 @@ class LoginService(BaseService):
         password: bool
     ):
         return cls(
-            userId,
-            password,
-            service.servicename,
-            service.implements,
-            service.fileTransferMode,
-            service.fileTransferArchive,
-            service.description,
-            service.icon,
-            service.infoUrl,
-            service.helpUrl,
-            service.displayName,
+            userId=userId,
+            password=password,
+            servicename=service.servicename,
+            implements=service.implements,
+            fileTransferMode=service.fileTransferMode,
+            fileTransferArchive=service.fileTransferArchive,
+            description=service.description,
+            icon=service.icon,
+            infoUrl=service.infoUrl,
+            helpUrl=service.helpUrl,
+            displayName=service.displayName,
         )
 
 
@@ -549,19 +556,19 @@ class OAuth2Service(BaseService):
         Converts the given Service to an oauth2service.
         """
         return cls(
-            authorize_url,
-            refresh_url,
-            client_id,
-            client_secret,
-            service.servicename,
-            service.implements,
-            service.fileTransferMode,
-            service.fileTransferArchive,
-            service.description,
-            service.icon,
-            service.infoUrl,
-            service.helpUrl,
-            service.displayName,
+            authorize_url=authorize_url,
+            refresh_url=refresh_url,
+            client_id=client_id,
+            client_secret=client_secret,
+            servicename=service.servicename,
+            implements=service.implements,
+            fileTransferMode=service.fileTransferMode,
+            fileTransferArchive=service.fileTransferArchive,
+            description=service.description,
+            icon=service.icon,
+            infoUrl=service.infoUrl,
+            helpUrl=service.helpUrl,
+            displayName=service.displayName,
         )
 
     def __eq__(self, obj):
