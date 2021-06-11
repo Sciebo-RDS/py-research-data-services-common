@@ -91,12 +91,18 @@ class BaseService:
             self._description = description
 
         if infoUrl is not None:
-            self._infoUrl = parse.quote_plus(infoUrl)
+            if parse.unquote_plus(infoUrl) == infoUrl:
+                self._infoUrl = parse.quote_plus(infoUrl)
+            else:
+                self._infoUrl = infoUrl
         else:
             self._infoUrl = ""
 
         if helpUrl is not None:
-            self._helpUrl = parse.quote_plus(helpUrl)
+            if parse.unquote_plus(helpUrl) == helpUrl:
+                self._helpUrl = parse.quote_plus(helpUrl)
+            else:
+                self._helpUrl = helpUrl
         else:
             self._helpUrl = ""
 

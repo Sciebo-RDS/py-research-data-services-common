@@ -576,6 +576,10 @@ class TestService(unittest.TestCase):
             infoUrl=infoUrl
         )
         self.assertEqual(infoUrl, parse.unquote_plus(svc1.infoUrl))
+        self.assertEqual(BaseService.from_json(
+            svc1.to_json()).infoUrl, parse.quote_plus(infoUrl))
+        self.assertNotEqual(BaseService.from_json(
+            svc1.to_json()).infoUrl, infoUrl)
 
         svc1 = BaseService(
             servicename="owncloud",
