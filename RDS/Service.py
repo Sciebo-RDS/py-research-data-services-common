@@ -465,8 +465,9 @@ class OAuth2Service(BaseService):
         data = {
             "grant_type": "refresh_token",
             "refresh_token": token.refresh_token,
-            "redirect_uri": "{}/redirect".format(
-                os.getenv("RDS_OAUTH_REDIRECT_URI", "http://localhost:8080")
+            "redirect_uri": "{}".format(
+                os.getenv("RDS_OAUTH_REDIRECT_URI",
+                          "http://localhost:8080/redirect")
             ),
             "client_id": self.client_id,
             "client_secret": self.client_secret,
