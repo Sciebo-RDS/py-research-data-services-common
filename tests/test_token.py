@@ -2,6 +2,7 @@ import unittest
 import json
 
 from RDS import Token, LoginToken, OAuth2Token, User, LoginService, OAuth2Service, FileTransferMode, FileTransferArchive, BaseService
+from RDS import Util
 
 
 class TestToken(unittest.TestCase):
@@ -196,3 +197,19 @@ class TestToken(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             Token(user1, service1, "")
+
+    def test_initToken(self):
+        self.assertEqual(self.oauthtoken1, Util.initToken(
+            self.oauthtoken1.to_json()))
+        self.assertEqual(self.oauthtoken1, Util.initToken(
+            self.oauthtoken1.to_dict()))
+        self.assertEqual(self.oauthtoken1.expiration_date,
+                         Util.initToken(self.oauthtoken1.to_json()).expiration_date)
+        self.assertEqual(self.oauthtoken1.expiration_date,
+                         Util.initToken(self.oauthtoken1.to_dict()).expiration_date)
+        self.assertTrue(isinstance(Util.initToken(
+            self.oauthtoken1.to_json()), OAuth2Token))
+        self.assertTrue(isinstance(Util.initToken(
+            self.oauthtoken1.to_dict()), OAuth2Token))
+        self.assertNotEqual(self.oauthtoken2, Util.initToken(
+            self.oauthtoken1.to_json()))

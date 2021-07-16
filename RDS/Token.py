@@ -16,8 +16,8 @@ def initToken(obj: Union[str, dict]):
     load = try_function_on_dict(
         [
             OAuth2Token.from_json,
-            LoginToken.from_json,
             OAuth2Token.from_dict,
+            LoginToken.from_json,
             LoginToken.from_dict,
             Token.from_json,
             Token.from_dict,
@@ -267,5 +267,5 @@ class OAuth2Token(Token):
             token.service,
             token.access_token,
             tokenDict["refresh_token"],
-            tokenDict["expiration_date"],
+            datetime.datetime.fromisoformat(tokenDict["expiration_date"]),
         )
