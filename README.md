@@ -93,8 +93,13 @@ Util.monkeypatch("getDict", app=app)
 
 The first argument in the previous example, you can see how to set the method, which should be used for json encoding from your object. The *monkeypatch*-method patches JSONEncoder in your python installation and your app flask.
 
+# RO-Crate Parser
+
+This helps you to work with ro-crate-metadata files. Take a look in the [tests](https://github.com/Sciebo-RDS/py-research-data-services-common/blob/0a0e8bda0eaec1b539a5d5884feba4812b2d37db/tests/test_roparser.py#L19) to see, how this can be used.
+
 ## Available Modules
 
 - User
 - Service (Oauth2Service)
 - Token (Oauth2Token)
+- ROParser
