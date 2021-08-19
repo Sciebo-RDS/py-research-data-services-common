@@ -3,6 +3,7 @@ from .Service import *
 from . import ServiceException
 from .Token import *
 from .Informations import *
+from .ROParser import *
 import RDS.Util as Util
 
 
@@ -13,7 +14,7 @@ def int_or_str(value):
         return value
 
 
-__version__ = "0.45"
+__version__ = "0.46"
 VERSION = tuple(map(int_or_str, __version__.split(".")))
 
 __all__ = [

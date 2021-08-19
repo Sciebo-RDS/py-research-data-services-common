@@ -1,0 +1,26 @@
+{
+   "name":"my Research Object Crate123",
+   "@id":"./",
+   "@type":"Dataset",
+   "creator":[
+      {
+         "@id":"b4322a09-2ba0-4aec-8bb9-3dc9776d08fb"
+      },
+      {
+         "@id":"d91bf639-ba83-4e20-a7eb-7c3cd21fcb27"
+      }
+   ],
+   "osfcategory":[
+      "analysis",
+      "123"
+   ],
+   "zenodocategory":[
+      "publication/book"
+   ],
+   "datePublished":[
+      "2021-08-09T22:00:00.000Z"
+   ],
+   "description":[
+      "Testasd2123"
+   ]
+}
