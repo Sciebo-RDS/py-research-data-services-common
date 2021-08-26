@@ -519,33 +519,14 @@ class OAuth2Service(BaseService):
 
         logger.debug(f"response data {data}")
 
-        """ obsolete
-        if not data["user_id"] == self.client_id:
-            from RDS.ServiceException import Token.TokenNotValidError
-            raise Token.TokenNotValidError(
-                self, token, "User-ID in refresh response not equal to authenticated user.")
-        """
-
         date = datetime.now() + timedelta(seconds=data["expires_in"])
-        try:
-            new_token = OAuth2Token(
-                token.user,
-                token.service,
-                data["access_token"],
-                data["refresh_token"],
-                date,
-            )
-        except KeyError as e:
-            logger.error(e)
-            logger.debug("refresh_token still active.")
-
-            new_token = OAuth2Token(
-                token.user,
-                token.service,
-                data["access_token"],
-                token.refresh_token,
-                date,
-            )
+        new_token = OAuth2Token(
+            token.user,
+            token.service,
+            data["access_token"],
+            data.get("refresh_token") or token.refresh_token,
+            date,
+        )
 
         logger.debug(f"new token {new_token}")
         return new_token
