@@ -519,12 +519,16 @@ class OAuth2Service(BaseService):
 
         logger.debug(f"response data {data}")
 
-        date = datetime.now() + timedelta(seconds=data["expires_in"])
+        exp_date = data["expires_in"]
+        if exp_date > 3600:
+            exp_date = 3600
+
+        date = datetime.now() + timedelta(seconds=exp_date)
         new_token = OAuth2Token(
             token.user,
-            token.service,
+            self,
             data["access_token"],
-            data.get("refresh_token") or token.refresh_token,
+            data.get("refresh_token", token.refresh_token),
             date,
         )
 
