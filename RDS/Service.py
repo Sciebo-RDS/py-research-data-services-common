@@ -12,6 +12,7 @@ import base64
 import os.path
 from io import IOBase
 from urllib import parse
+from requests.exceptions import Timeout
 
 logger = logging.getLogger()
 
@@ -475,12 +476,17 @@ class OAuth2Service(BaseService):
 
         logger.debug(f"send data {data}")
 
-        req = requests.post(
-            self.refresh_url,
-            data=data,
-            auth=(self.client_id, self.client_secret),
-            verify=(os.environ.get("VERIFY_SSL", "True") == "True"),
-        )
+        try:
+            req = requests.post(
+                self.refresh_url,
+                data=data,
+                auth=(self.client_id, self.client_secret),
+                verify=(os.environ.get("VERIFY_SSL", "True") == "True"),
+                timeout=15
+            )
+        except Timeout:
+            from RDS.ServiceException import OAuth2UnsuccessfulResponseError
+            raise OAuth2UnsuccessfulResponseError()
 
         logger.debug(f"status code: {req.status_code}")
 
