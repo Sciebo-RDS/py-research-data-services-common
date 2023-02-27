@@ -56,6 +56,7 @@ class BaseService:
     _infoUrl = None
     _helpUrl = None
     _displayName = None
+    _metadataProfile = None
 
     def __init__(
         self,
@@ -67,7 +68,8 @@ class BaseService:
         icon: str = "",
         infoUrl: str = "",
         helpUrl: str = "",
-        displayName: str = None
+        displayName: str = None,
+        metadataProfile: str = None
     ):
         """Initialize Service without any authentication.
 
@@ -81,6 +83,7 @@ class BaseService:
             infoUrl: (str, optional): Set the infoUrl for this service, so the user can be redirected to it to find more information about the service. Defaults to "".
             helpUrl: (str, optional): Set the helpUrl for this service, so the user can be redirected to a helpdesk page about this service. Defaults to "".
             displayName: (str, optional): Set the displayName for this service, which can be different as the servicename. Servicename will be used for identifiers. Defaults to "".
+            metadataProfile: (str, optional): Set the metadata profile for the this service
         """
         self.check_string(servicename, "servicename")
 
@@ -122,6 +125,19 @@ class BaseService:
                     b64 = base64.b64encode(f.read()).decode("utf-8")
                     self._icon = f"data:{mime};base64,{b64}"
             else:
+                raise FileNotFoundError
+
+        if metadataProfile is not None and metadataProfile != "":
+            if os.path.isfile(metadataProfile):
+                try:
+                    with open(metadataProfile, "r") as f:
+                        metadataProfile = f.read()
+                        json.loads(metadataProfile)
+                        self._metadataProfile = metadataProfile
+                except:
+                    self._metadataProfile = None
+            else:
+                self._metadataProfile = None
                 raise FileNotFoundError
 
         self._implements = implements
@@ -180,6 +196,10 @@ class BaseService:
     def implements(self):
         return self._implements
 
+    @property
+    def metadataProfile(self):
+        return self._metadataProfile
+
     def check_string(self, obj: str, string: str):
         if not obj:
             raise ValueError(f"{string} cannot be an empty string.")
@@ -221,7 +241,8 @@ class BaseService:
             "icon": self._icon,
             "infoUrl": self._infoUrl,
             "helpUrl": self._helpUrl,
-            "displayName": self._displayName
+            "displayName": self._displayName,
+            "metadataProfile": self._metadataProfile
         }
 
         return data
@@ -252,7 +273,8 @@ class BaseService:
                 icon=data.get("icon"),
                 infoUrl=data.get("infoUrl"),
                 helpUrl=data.get("helpUrl"),
-                displayName=data.get("displayName")
+                displayName=data.get("displayName"),
+                metadataProfile=data.get("metadataProfile")
             )
 
         raise ValueError("not a valid service json string.")
@@ -275,7 +297,8 @@ class BaseService:
                 icon=serviceDict.get("icon"),
                 infoUrl=serviceDict.get("infoUrl"),
                 helpUrl=serviceDict.get("helpUrl"),
-                displayName=serviceDict.get("displayName")
+                displayName=serviceDict.get("displayName"),
+                metadataProfile=serviceDict.get("metadataProfile")
             )
         except Exception as e:
             logger.error(e, exc_info=True)
@@ -398,6 +421,7 @@ class LoginService(BaseService):
             infoUrl=service.infoUrl,
             helpUrl=service.helpUrl,
             displayName=service.displayName,
+            metadataProfile=service.metadataProfile
         )
 
 
@@ -583,6 +607,7 @@ class OAuth2Service(BaseService):
             infoUrl=service.infoUrl,
             helpUrl=service.helpUrl,
             displayName=service.displayName,
+            metadataProfile=service.metadataProfile
         )
 
     def __eq__(self, obj):
