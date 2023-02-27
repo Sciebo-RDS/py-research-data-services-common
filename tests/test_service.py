@@ -565,6 +565,31 @@ class TestService(unittest.TestCase):
             self.assertFalse(str(svc1.icon).find("b'") >= 0)
             self.assertFalse(str(svc1.icon).find("'") >= 0)
 
+    def test_metadata_profile(self):
+        # if a filepath was given, then it has to exist.
+        with self.assertRaises(FileNotFoundError):
+            BaseService(
+                servicename="owncloud",
+                implements=["fileStorage"],
+                fileTransferMode=FileTransferMode.active,
+                fileTransferArchive=FileTransferArchive.none,
+                metadataProfile="sciebo.json"
+            )
+
+        filename = "./tests/test.json"
+
+        with open(filename, 'r') as f:
+            metadata = f.read()
+
+            svc = BaseService(
+                servicename="owncloud",
+                implements=["fileStorage"],
+                fileTransferMode=FileTransferMode.active,
+                fileTransferArchive=FileTransferArchive.none,
+                metadataProfile=filename
+            )
+            self.assertEqual(metadata, svc.metadataProfile)
+
     def test_url(self):
         infoUrl = "http://localhost"
 
