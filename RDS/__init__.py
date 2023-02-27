@@ -14,7 +14,7 @@ def int_or_str(value):
         return value
 
 
-__version__ = "0.50"
+__version__ = "0.51"
 VERSION = tuple(map(int_or_str, __version__.split(".")))
 
 __all__ = [
