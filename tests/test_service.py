@@ -579,7 +579,7 @@ class TestService(unittest.TestCase):
         filename = "./tests/test.json"
 
         with open(filename, 'r') as f:
-            metadata = f.read()
+            metadata = bytes(f.read(), 'utf-8')
 
             svc = BaseService(
                 servicename="owncloud",

@@ -133,7 +133,7 @@ class BaseService:
                     with open(metadataProfile, "r") as f:
                         metadataProfile = f.read()
                         json.loads(metadataProfile)
-                        self._metadataProfile = metadataProfile
+                        self._metadataProfile = bytes(metadataProfile, 'utf-8')
                 except:
                     self._metadataProfile = None
             else:
