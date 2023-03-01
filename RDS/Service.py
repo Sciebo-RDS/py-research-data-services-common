@@ -128,19 +128,20 @@ class BaseService:
                 raise FileNotFoundError
 
         if metadataProfile is not None and metadataProfile != "":
-            if isinstance(icon, (str)) and str(metadataProfile).endswith("=="):
-                self._metadataProfile = metadataProfile
-            elif os.path.isfile(metadataProfile):
+            if os.path.isfile(metadataProfile):
                 try:
                     with open(metadataProfile, "rb") as f:
                         metadataProfile = f.read()
                         json.loads(metadataProfile)
-                        self._metadataProfile = b64 = base64.b64encode(metadataProfile).decode("utf-8")
+                        self._metadataProfile = base64.b64encode(metadataProfile).decode("utf-8")
                 except:
                     self._metadataProfile = None
             else:
-                self._metadataProfile = None
-                raise FileNotFoundError
+                try:
+                    b64 = base64.b64decode(metadataProfile).decode("utf-8")
+                    self._metadataProfile = metadataProfile
+                except:
+                    self._metadataProfile = None
 
         self._implements = implements
         if implements is None:
