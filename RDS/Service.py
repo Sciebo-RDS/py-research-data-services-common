@@ -128,7 +128,9 @@ class BaseService:
                 raise FileNotFoundError
 
         if metadataProfile is not None and metadataProfile != "":
-            if os.path.isfile(metadataProfile):
+            if isinstance(icon, (str)) and str(metadataProfile).endswith("=="):
+                self._metadataProfile = metadataProfile
+            elif os.path.isfile(metadataProfile):
                 try:
                     with open(metadataProfile, "rb") as f:
                         metadataProfile = f.read()
