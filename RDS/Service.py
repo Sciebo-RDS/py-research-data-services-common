@@ -57,6 +57,7 @@ class BaseService:
     _helpUrl = None
     _displayName = None
     _metadataProfile = None
+    _projectLinkTemplate = None
 
     def __init__(
         self,
@@ -69,7 +70,8 @@ class BaseService:
         infoUrl: str = "",
         helpUrl: str = "",
         displayName: str = None,
-        metadataProfile: str = None
+        metadataProfile: str = None,
+        projectLinkTemplate: str = ""
     ):
         """Initialize Service without any authentication.
 
@@ -84,6 +86,7 @@ class BaseService:
             helpUrl: (str, optional): Set the helpUrl for this service, so the user can be redirected to a helpdesk page about this service. Defaults to "".
             displayName: (str, optional): Set the displayName for this service, which can be different as the servicename. Servicename will be used for identifiers. Defaults to "".
             metadataProfile: (str, optional): Set the metadata profile for the this service
+            projectLinkTemplate: (str, optional): Set template for project url on this service. User `${projectId}` (javascript format string notation!) to mark where the project ID goes.
         """
         self.check_string(servicename, "servicename")
 
@@ -142,6 +145,8 @@ class BaseService:
                     self._metadataProfile = metadataProfile
                 except:
                     self._metadataProfile = None
+
+        self._projectLinkTemplate = projectLinkTemplate
 
         self._implements = implements
         if implements is None:
@@ -202,6 +207,10 @@ class BaseService:
     @property
     def metadataProfile(self):
         return self._metadataProfile
+    
+    @property
+    def projectLinkTemplate(self):
+        return self._projectLinkTemplate
 
     def check_string(self, obj: str, string: str):
         if not obj:
@@ -245,7 +254,8 @@ class BaseService:
             "infoUrl": self._infoUrl,
             "helpUrl": self._helpUrl,
             "displayName": self._displayName,
-            "metadataProfile": self._metadataProfile
+            "metadataProfile": self._metadataProfile,
+            "projectLinkTemplate": self._projectLinkTemplate
         }
 
         return data
@@ -277,7 +287,8 @@ class BaseService:
                 infoUrl=data.get("infoUrl"),
                 helpUrl=data.get("helpUrl"),
                 displayName=data.get("displayName"),
-                metadataProfile=data.get("metadataProfile")
+                metadataProfile=data.get("metadataProfile"),
+                projectLinkTemplate=data.get("projectLinkTemplate")
             )
 
         raise ValueError("not a valid service json string.")
@@ -301,7 +312,8 @@ class BaseService:
                 infoUrl=serviceDict.get("infoUrl"),
                 helpUrl=serviceDict.get("helpUrl"),
                 displayName=serviceDict.get("displayName"),
-                metadataProfile=serviceDict.get("metadataProfile")
+                metadataProfile=serviceDict.get("metadataProfile"),
+                projectLinkTemplate=serviceDict.get("projectLinkTemplate")
             )
         except Exception as e:
             logger.error(e, exc_info=True)
@@ -424,7 +436,8 @@ class LoginService(BaseService):
             infoUrl=service.infoUrl,
             helpUrl=service.helpUrl,
             displayName=service.displayName,
-            metadataProfile=service.metadataProfile
+            metadataProfile=service.metadataProfile,
+            projectLinkTemplate=service.projectLinkTemplate
         )
 
 
@@ -610,7 +623,8 @@ class OAuth2Service(BaseService):
             infoUrl=service.infoUrl,
             helpUrl=service.helpUrl,
             displayName=service.displayName,
-            metadataProfile=service.metadataProfile
+            metadataProfile=service.metadataProfile,
+            projectLinkTemplate=service.projectLinkTemplate
         )
 
     def __eq__(self, obj):
