@@ -566,7 +566,7 @@ class TestService(unittest.TestCase):
             self.assertFalse(str(svc1.icon).find("'") >= 0)
 
     def test_metadata_profile(self):
-        # if a filepath was given, then it has to exist.
+        # if a filepath was given, it has to exist.
         with self.assertRaises(FileNotFoundError):
             BaseService(
                 servicename="owncloud",

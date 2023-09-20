@@ -132,13 +132,10 @@ class BaseService:
 
         if metadataProfile is not None and metadataProfile != "":
             if os.path.isfile(metadataProfile):
-                try:
-                    with open(metadataProfile, "rb") as f:
-                        metadataProfile = f.read()
-                        json.loads(metadataProfile)
-                        self._metadataProfile = base64.b64encode(metadataProfile).decode("utf-8")
-                except:
-                    self._metadataProfile = None
+                with open(metadataProfile, "rb") as f:
+                    metadataProfile = f.read()
+                    json.loads(metadataProfile)
+                    self._metadataProfile = base64.b64encode(metadataProfile).decode("utf-8")
             else:
                 try:
                     b64 = base64.b64decode(metadataProfile).decode("utf-8")
